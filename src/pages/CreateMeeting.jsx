@@ -239,6 +239,11 @@ export default function CreateMeeting({ onSuccess, onBack }) {
       const { success, data: meeting } = await createMeeting({
         ...formData,
         organizer_name: participants[0]?.name || '조율자',
+        participants: participants.map((p) => ({
+          id: p.id,
+          name: p.name,
+          isRequired: p.isRequired,
+        })),
       });
 
       if (!success) {
@@ -567,6 +572,26 @@ export default function CreateMeeting({ onSuccess, onBack }) {
                 }}
               >
                 복사
+              </button>
+            </div>
+
+            <div className="share-buttons">
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  const fullUrl = `${window.location.origin}/meeting/${createdMeeting.share_link}`;
+                  if (navigator.share) {
+                    navigator.share({
+                      title: '회의 일정 조율',
+                      text: `${createdMeeting.title} 회의에 참석해주세요!`,
+                      url: fullUrl,
+                    }).catch((err) => console.log('공유 취소'));
+                  } else {
+                    alert('이 브라우저에서는 공유 기능을 지원하지 않습니다.');
+                  }
+                }}
+              >
+                📤 공유하기
               </button>
             </div>
           </div>

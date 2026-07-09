@@ -1,11 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import './styles/globals.css';
 import './styles/create-meeting.css';
+import './styles/participant-form.css';
 import CreateMeeting from './pages/CreateMeeting';
+import ParticipantForm from './pages/ParticipantForm';
 
 function App() {
-  const [page, setPage] = useState('home'); // home, create, view
+  const [page, setPage] = useState('home');
+  const [shareLink, setShareLink] = useState(null);
+
+  useEffect(() => {
+    // URL에서 /meeting/[shareLink] 패턴 확인
+    const path = window.location.pathname;
+    console.log('Current path:', path);
+
+    if (path.includes('/meeting/')) {
+      const link = path.split('/meeting/')[1];
+      console.log('Extracted link:', link);
+
+      if (link && link.trim()) {
+        setShareLink(link);
+        setPage('participant');
+      }
+    }
+  }, [window.location.pathname]);
 
   return (
     <div className="app">
@@ -56,19 +75,12 @@ function App() {
           </div>
         )}
 
-        {page === 'view' && (
-          <div className="view-page">
-            <button
-              className="btn btn-secondary"
-              onClick={() => setPage('home')}
-              style={{ marginBottom: '16px' }}
-            >
-              ← 돌아가기
-            </button>
-            <div className="card">
-              <h2>회의 참가</h2>
-              <p className="text-sm">이 섹션은 개발 예정입니다.</p>
-            </div>
+        {page === 'participant' && shareLink && (
+          <div className="participant-page">
+            <ParticipantForm
+              shareLink={shareLink}
+              onBack={() => setPage('home')}
+            />
           </div>
         )}
       </main>

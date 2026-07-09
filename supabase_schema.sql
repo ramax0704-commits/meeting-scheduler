@@ -12,6 +12,7 @@ CREATE TABLE meetings (
   recurrence_days INTEGER, -- 주 단위 반복 (7 = 매주)
   time_start INTEGER DEFAULT 8, -- 24시간 형식 (08:00)
   time_end INTEGER DEFAULT 22, -- 24시간 형식 (22:00)
+  participants JSONB DEFAULT '[]'::jsonb, -- 참석자 정보 저장: [{id, name, isRequired}, ...]
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );

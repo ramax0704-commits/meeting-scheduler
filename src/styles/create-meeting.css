@@ -541,6 +541,7 @@
   border: 1px solid #efefef;
   border-radius: 12px;
   padding: 12px;
+  margin-bottom: 12px;
 }
 
 .share-link code {
@@ -554,6 +555,17 @@
 
 .share-link .btn {
   white-space: nowrap;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.share-buttons .btn {
+  flex: 1;
+  padding: 12px 16px;
+  min-height: 44px;
 }
 
 @media (max-width: 640px) {

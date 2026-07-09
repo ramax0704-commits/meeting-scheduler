@@ -1,0 +1,249 @@
+.participant-form {
+  width: 100%;
+}
+
+/* 회의 정보 섹션 */
+.meeting-summary {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #efefef;
+}
+
+.meeting-summary p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.meeting-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.meeting-summary strong {
+  color: #000;
+  font-weight: 500;
+}
+
+/* 참석자 목록 */
+.participants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+.participant-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.participant-item .badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.badge.required {
+  background-color: #f0f7ff;
+  color: #4772fa;
+}
+
+.badge.optional {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+/* 상태 토글 */
+.status-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.toggle-option {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #efefef;
+  border-radius: 12px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+.toggle-option:hover {
+  border-color: #999;
+}
+
+.toggle-option.active {
+  border-color: #4772fa;
+  background-color: #f0f7ff;
+  color: #4772fa;
+}
+
+/* 상태 점 */
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.unavailable {
+  background-color: #f0524b;
+}
+
+.status-dot.maybe {
+  background-color: #f5a623;
+}
+
+/* 그리드 */
+.time-grid-container {
+  margin-bottom: 20px;
+  overflow-x: auto;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  background-color: white;
+}
+
+.time-grid {
+  display: inline-grid;
+  gap: 0;
+  padding: 12px;
+  min-width: 100%;
+}
+
+.grid-header {
+  display: grid;
+  grid-template-columns: 60px repeat(auto-fit, minmax(80px, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 12px;
+  text-align: center;
+}
+
+.time-column {
+  padding: 8px 0;
+}
+
+.date-column {
+  padding: 8px 0;
+  color: #666;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: 60px repeat(auto-fit, minmax(80px, 1fr));
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.time-label {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+}
+
+.grid-cell {
+  aspect-ratio: 1;
+  border: 1px solid #efefef;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: white;
+  transition: all 0.1s;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.grid-cell:hover {
+  background-color: #f9f9f9;
+  border-color: #999;
+}
+
+/* 선택된 셀 */
+.grid-cell.selected-unavailable {
+  background-color: #f0524b;
+  border-color: #f0524b;
+}
+
+.grid-cell.selected-maybe {
+  background-color: #f5a623;
+  border-color: #f5a623;
+}
+
+/* 입력 필드 */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #000;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4772fa;
+  box-shadow: 0 0 0 3px rgba(71, 114, 250, 0.1);
+}
+
+/* 버튼 */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions .btn {
+  flex: 1;
+  padding: 12px 16px;
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  .status-toggle {
+    gap: 8px;
+  }
+
+  .toggle-option {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .grid-header,
+  .grid-row {
+    grid-template-columns: 50px repeat(auto-fit, minmax(60px, 1fr));
+  }
+
+  .grid-cell {
+    min-width: 30px;
+    min-height: 30px;
+  }
+}
