@@ -93,6 +93,12 @@ export default function CreateMeeting({ onSuccess, onBack }) {
         setDateSelectStart(selectedDate);
         setDateSelectEnd(null);
       } else {
+        // 최대 7일까지만 선택 가능
+        const daysDiff = dayjs(selectedDate).diff(dayjs(dateSelectStart), 'day');
+        if (daysDiff > 6) {
+          setError('최대 7일까지만 선택 가능합니다');
+          return;
+        }
         setDateSelectEnd(selectedDate);
         setFormData((prev) => ({
           ...prev,
