@@ -184,7 +184,7 @@ export default function ParticipantForm({ shareLink, onBack }) {
             {/* 행: 시간대 */}
             {hours.map((time) => (
               <div key={time} className="grid-row">
-                <div className="time-label">{time}</div>
+                <div className="time-label">{time.substring(0, 5)}</div>
                 {dates.map((date) => {
                   const cellId = getCellId(date, time);
                   const isSelected = selectedCells.has(cellId);
