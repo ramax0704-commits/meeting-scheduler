@@ -27,9 +27,11 @@ export default function ParticipantForm({ shareLink, onBack }) {
         return;
       }
 
+      console.log('Meeting data:', meetingData);
       setMeeting(meetingData);
 
       const { success: slotsSuccess, data: slotsData } = await getTimeSlots(meetingData.id);
+      console.log('Time slots:', slotsData);
       if (slotsSuccess) {
         setTimeSlots(slotsData);
       }
