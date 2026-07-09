@@ -1,0 +1,128 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+}
+
+.app-header {
+  background-color: white;
+  border-bottom: 1px solid #efefef;
+  padding: 40px 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-size: 32px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.app-subtitle {
+  font-size: 16px;
+  color: #999;
+  font-weight: 400;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 홈페이지 스타일 - 중앙 정렬 */
+.home-page {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* 회의 생성 페이지 - 중앙 정렬 */
+.create-page {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* 회의 참가 페이지 - 중앙 정렬 */
+.view-page {
+  width: 100%;
+  max-width: 480px;
+}
+
+.card {
+  width: 100%;
+  background-color: white;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.card h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.card p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4772fa;
+  box-shadow: 0 0 0 3px rgba(71, 114, 250, 0.1);
+}
+
+.app-footer {
+  background-color: white;
+  border-top: 1px solid #efefef;
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    padding: 32px 16px;
+  }
+
+  .app-title {
+    font-size: 24px;
+  }
+
+  .app-subtitle {
+    font-size: 14px;
+  }
+
+  .app-main {
+    padding: 24px 16px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .app-footer {
+    padding: 20px 16px;
+    font-size: 11px;
+  }
+}

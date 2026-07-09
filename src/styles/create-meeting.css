@@ -1,0 +1,603 @@
+.create-meeting {
+  width: 100%;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #4772fa;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.back-button:hover {
+  opacity: 0.7;
+}
+
+.form-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.form-header h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.steps-indicator {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e8e8e8;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.step.active {
+  background-color: #4772fa;
+  color: white;
+}
+
+.error-message {
+  background-color: #fff5f5;
+  border: 1px solid #f0524b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: #f0524b;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #000;
+  text-align: left;
+}
+
+.form-sublabel {
+  font-size: 12px;
+  font-weight: 400;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4772fa;
+  box-shadow: 0 0 0 3px rgba(71, 114, 250, 0.1);
+}
+
+.form-group textarea {
+  min-height: 80px;
+}
+
+.form-group.checkbox {
+  margin-bottom: 16px;
+}
+
+.form-group.checkbox label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.form-group.checkbox input[type='checkbox'] {
+  width: auto;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row.time-range .time-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row.time-range .form-sublabel {
+  text-align: left;
+}
+
+.form-row.time-range select {
+  text-align: left;
+  padding-left: 12px;
+  padding-right: 40px;
+  background-position: right 12px center;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions .btn {
+  flex: 1;
+  padding: 12px 16px;
+  min-height: 44px;
+}
+
+/* 날짜 선택 버튼 */
+.date-mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.date-mode-buttons .btn {
+  padding: 10px 12px;
+  font-size: 13px;
+  height: auto;
+  min-height: 40px;
+}
+
+.date-mode-buttons .btn.btn-primary {
+  background-color: #f0f7ff;
+  color: #4772fa;
+  border: 1px solid #4772fa;
+}
+
+.date-mode-buttons .btn.btn-secondary {
+  background-color: white;
+  color: #666;
+  border: 1px solid #efefef;
+}
+
+/* 주간 선택 */
+.week-picker {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #efefef;
+}
+
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.week-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: none;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 8px;
+}
+
+.week-day-label {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.week-day-date {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.week-day:hover {
+  background-color: #f9f9f9;
+}
+
+.week-day.selected-start,
+.week-day.selected-end {
+  background-color: #4772fa;
+  color: white;
+  border: 1px solid #4772fa;
+}
+
+.week-day.selected-start .week-day-label,
+.week-day.selected-end .week-day-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.week-day.in-range {
+  background-color: #f0f7ff;
+  color: #4772fa;
+  border: 1px solid transparent;
+}
+
+/* 월간 캘린더 */
+.month-picker {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #efefef;
+}
+
+.calendar-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.calendar-header span:first-child {
+  font-weight: 500;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  margin-bottom: 8px;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  color: #999;
+  padding: 8px 0;
+}
+
+.calendar-days {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s;
+  font-weight: 400;
+}
+
+.calendar-day.empty {
+  background-color: transparent;
+  border: none;
+  cursor: default;
+  color: #ccc;
+}
+
+.calendar-day.active:hover {
+  background-color: #f9f9f9;
+}
+
+.calendar-day.selected-start,
+.calendar-day.selected-end {
+  background-color: #4772fa;
+  color: white;
+  border: 1px solid #4772fa;
+  font-weight: 500;
+}
+
+.calendar-day.in-range {
+  background-color: #f0f7ff;
+  color: #4772fa;
+  border: 1px solid transparent;
+}
+
+/* 회의 길이 버튼 */
+.duration-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.duration-btn {
+  padding: 10px 12px;
+  border: 1px solid #efefef;
+  border-radius: 8px;
+  background-color: white;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.duration-btn:hover {
+  border-color: #4772fa;
+  color: #4772fa;
+  background-color: #f0f7ff;
+}
+
+.duration-btn.active {
+  background-color: #f0f7ff;
+  color: #4772fa;
+  border: 1px solid #4772fa;
+  font-weight: 500;
+}
+
+/* 참석자 섹션 */
+.participants-section {
+  margin-bottom: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.participant-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.participant-name-input {
+  flex: 1 !important;
+  padding: 12px !important;
+}
+
+.participant-name-input:disabled {
+  background-color: #f9f9f9;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* 토글 버튼 그룹 */
+.toggle-group {
+  display: flex;
+  gap: 6px;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+/* 선택 활성화 상태 */
+.toggle-group.optional {
+  background-color: #e8e8e8;
+}
+
+.toggle-group.optional .toggle-btn {
+  background-color: transparent;
+  color: #919191;
+}
+
+.toggle-group.optional .toggle-btn.active {
+  background-color: white;
+  color: #666666;
+}
+
+/* 필수 활성화 상태 */
+.toggle-group.required {
+  background-color: #ffdddd;
+}
+
+.toggle-group.required .toggle-btn {
+  background-color: transparent;
+  color: #919191;
+}
+
+.toggle-group.required .toggle-btn.active {
+  background-color: white;
+  color: #ff6e6e;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.remove-btn {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  color: #999;
+  font-size: 18px;
+  cursor: pointer;
+  transition: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.add-participant-btn {
+  width: auto;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  color: #999;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.add-participant-btn:hover {
+  color: #4772fa;
+}
+
+.badge {
+  background-color: #e3f2fd;
+  color: #4772fa;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.success-card {
+  background-color: #f9fff9;
+  border-color: #4772fa;
+}
+
+.meeting-info {
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.meeting-info p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.meeting-info p:last-child {
+  margin-bottom: 0;
+}
+
+.meeting-info strong {
+  font-weight: 500;
+  color: #000;
+}
+
+.share-section {
+  margin: 20px 0;
+}
+
+.share-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.share-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.share-link code {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #4772fa;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.share-link .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .date-mode-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .duration-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .week-days {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .week-day {
+    padding: 4px;
+  }
+
+  .week-day-date {
+    font-size: 14px;
+  }
+
+  .participant-row {
+    flex-wrap: wrap;
+  }
+
+  .remove-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .required-toggle {
+    min-width: 70px;
+    height: 40px;
+    font-size: 11px;
+  }
+}
