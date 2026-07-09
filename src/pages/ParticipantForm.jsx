@@ -47,6 +47,10 @@ export default function ParticipantForm({ shareLink, onBack }) {
   const dates = [...new Set(timeSlots.map((slot) => slot.slot_date))].sort();
   const hours = [...new Set(timeSlots.map((slot) => slot.start_time))].sort();
 
+  console.log('Computed dates:', dates);
+  console.log('Computed hours:', hours);
+  console.log('TimeSlots count:', timeSlots.length);
+
   const getCellId = (date, time) => `${date}-${time}`;
 
   const handleCellMouseDown = (date, time) => {
