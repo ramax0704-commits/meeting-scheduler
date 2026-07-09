@@ -175,6 +175,19 @@
   border-color: #999;
 }
 
+/* 비활성 셀 */
+.grid-cell.disabled {
+  background-color: #e8e8e8;
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #ccc;
+}
+
+.grid-cell.disabled:hover {
+  background-color: #e8e8e8;
+  border-color: #ccc;
+}
+
 /* 선택된 셀 */
 .grid-cell.selected-unavailable {
   background-color: #f0524b;

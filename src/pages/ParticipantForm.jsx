@@ -43,13 +43,23 @@ export default function ParticipantForm({ shareLink, onBack }) {
     }
   };
 
-  // 고유한 날짜와 시간대 추출
-  const dates = [...new Set(timeSlots.map((slot) => slot.slot_date))].sort();
-  const hours = [...new Set(timeSlots.map((slot) => slot.start_time))].sort();
+  // 회의 기간 내 모든 날짜 생성 (항상 7개, 또는 선택된 기간만큼)
+  const getAllDatesInRange = () => {
+    const dates = [];
+    let current = dayjs(meeting.start_date);
+    const end = dayjs(meeting.end_date);
 
-  console.log('Computed dates:', dates);
-  console.log('Computed hours:', hours);
-  console.log('TimeSlots count:', timeSlots.length);
+    while (current.isSameOrBefore(end)) {
+      dates.push(current.format('YYYY-MM-DD'));
+      current = current.add(1, 'day');
+    }
+
+    return dates.sort();
+  };
+
+  const dates = getAllDatesInRange();
+  const hours = [...new Set(timeSlots.map((slot) => slot.start_time))].sort();
+  const availableDateSet = new Set(timeSlots.map((slot) => slot.slot_date));
 
   const getCellId = (date, time) => `${date}-${time}`;
 
@@ -194,12 +204,14 @@ export default function ParticipantForm({ shareLink, onBack }) {
                 {dates.map((date) => {
                   const cellId = getCellId(date, time);
                   const isSelected = selectedCells.has(cellId);
+                  const isActive = availableDateSet.has(date);
+
                   return (
                     <div
                       key={cellId}
-                      className={`grid-cell ${isSelected ? `selected-${selectedStatus}` : ''}`}
-                      onMouseDown={() => handleCellMouseDown(date, time)}
-                      onMouseEnter={() => handleCellMouseEnter(date, time)}
+                      className={`grid-cell ${isSelected ? `selected-${selectedStatus}` : ''} ${!isActive ? 'disabled' : ''}`}
+                      onMouseDown={() => isActive && handleCellMouseDown(date, time)}
+                      onMouseEnter={() => isActive && handleCellMouseEnter(date, time)}
                       onMouseUp={handleCellMouseUp}
                     />
                   );
