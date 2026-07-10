@@ -108,27 +108,60 @@ export default function OrganizerView({ shareLink, onBack }) {
   const fmtDate = (date) => `${dayjs(date).format('M월 D일')} (${WEEKDAYS[dayjs(date).day()]})`;
   const fmtRange = (info) => `${info.slot.start_time.slice(0, 5)}~${info.slot.end_time.slice(0, 5)}`;
 
-  // 추천: 순위를 억지로 매기지 않고, '조건이 가장 좋은' 슬롯을 모두 표시
-  const scored = meetingDates
-    .flatMap((date) => hours.map((time) => ({ date, time, info: getCellInfo(date, time) })))
-    .filter((c) => c.info)
-    .map((c) => ({
-      ...c,
-      score:
-        (c.info.requiredAllOk ? 1000 : 0) -
-        c.info.unavailable.length * 100 -
-        c.info.maybe.length * 10,
-    }));
-  const maxScore = scored.length ? Math.max(...scored.map((s) => s.score)) : 0;
-  const recommendedKeys = new Set(
-    responses.length > 0
-      ? scored.filter((s) => s.score === maxScore && s.info.requiredAllOk).map((s) => `${s.date}-${s.time}`)
-      : []
-  );
+  // 시간대 선호 점수 (오후 우대, 점심/늦은 시간 감점)
+  const timeBonus = (startTime) => {
+    const h = parseInt(startTime.slice(0, 2), 10);
+    if (h >= 13 && h <= 16) return 20; // 오후 (선호)
+    if (h >= 10 && h <= 11) return 10; // 늦은 오전
+    if (h === 12) return -5; // 점심
+    if (h >= 17) return -5; // 늦은 시간
+    return 0; // 이른 아침
+  };
+  const timeLabel = (startTime) => {
+    const h = parseInt(startTime.slice(0, 2), 10);
+    if (h >= 13 && h <= 16) return '오후 시간대';
+    if (h >= 10 && h <= 11) return '오전 시간대';
+    if (h === 12) return '점심 시간대';
+    if (h >= 17) return '늦은 시간대';
+    return '이른 시간대';
+  };
+
+  // 추천: 필참 전원 가능한 시간만 후보 → 점수순 → 하루 최대 2개로 분산 → 상위 5개
+  let recommendations = [];
+  if (responses.length > 0) {
+    const candidates = meetingDates
+      .flatMap((date) => hours.map((time) => ({ date, time, info: getCellInfo(date, time) })))
+      .filter((c) => c.info && c.info.requiredAllOk)
+      .map((c) => ({
+        ...c,
+        recScore: -c.info.unavailable.length * 100 - c.info.maybe.length * 25 + timeBonus(c.time),
+      }))
+      .sort(
+        (a, b) => b.recScore - a.recScore || (a.date + a.time).localeCompare(b.date + b.time)
+      );
+
+    const perDay = {};
+    const picked = [];
+    for (const c of candidates) {
+      if (picked.length >= 5) break;
+      if ((perDay[c.date] || 0) >= 2) continue; // 하루 최대 2개
+      perDay[c.date] = (perDay[c.date] || 0) + 1;
+      picked.push(c);
+    }
+    for (const c of candidates) {
+      if (picked.length >= 5) break;
+      if (!picked.includes(c)) picked.push(c);
+    }
+    recommendations = picked.map((c, i) => ({ ...c, rank: i + 1 }));
+  }
+
+  const recRankByKey = {};
+  recommendations.forEach((r) => {
+    recRankByKey[`${r.date}-${r.time}`] = r.rank;
+  });
 
   const selectedInfo = selectedCell ? getCellInfo(selectedCell.date, selectedCell.time) : null;
-  const selectedRecommended =
-    selectedCell && recommendedKeys.has(`${selectedCell.date}-${selectedCell.time}`);
+  const selectedRank = selectedCell ? recRankByKey[`${selectedCell.date}-${selectedCell.time}`] : undefined;
 
   // 그리드 렌더 (mode: 'status' | 'rec')
   const renderGrid = (mode) => (
@@ -154,14 +187,15 @@ export default function OrganizerView({ shareLink, onBack }) {
               const isSel = selectedCell && selectedCell.date === col.date && selectedCell.time === time;
 
               let extra = '';
-              let star = null;
+              let badge = null;
               if (mode === 'status') {
                 if (onlyRequired && info) extra = info.requiredAllOk ? 'req-ok' : 'dimmed';
               } else {
-                // 추천 탭: 추천 슬롯은 별표, 나머지는 흐리게
-                if (recommendedKeys.has(key)) {
+                // 추천 탭: 추천 슬롯은 순위 번호, 나머지는 흐리게
+                const rank = recRankByKey[key];
+                if (rank) {
                   extra = 'recommended';
-                  star = <span className="rec-star">★</span>;
+                  badge = <span className="rec-rank-badge">{rank}</span>;
                 } else {
                   extra = 'rec-dim';
                 }
@@ -173,7 +207,7 @@ export default function OrganizerView({ shareLink, onBack }) {
                   className={`org-cell ${heatClass(info)} ${extra} ${isSel ? 'selected' : ''}`}
                   onClick={() => setSelectedCell(isSel ? null : { date: col.date, time })}
                 >
-                  {star}
+                  {badge}
                 </div>
               );
             })}
@@ -249,11 +283,11 @@ export default function OrganizerView({ shareLink, onBack }) {
           <>
             {responses.length === 0 ? (
               <p className="org-subtitle">아직 응답이 없어요. 참석자들이 응답하면 추천 시간이 표시됩니다.</p>
-            ) : recommendedKeys.size === 0 ? (
+            ) : recommendations.length === 0 ? (
               <p className="org-subtitle">필참자가 모두 가능한 시간이 없어요.</p>
             ) : (
               <p className="org-subtitle">
-                ★ 표시가 조건이 가장 좋은 시간이에요 ({recommendedKeys.size}곳). 블록을 눌러 이유를 확인하세요.
+                필참자가 가능한 시간 중 좋은 순으로 최대 5곳이에요. 번호를 눌러 이유를 확인하세요.
               </p>
             )}
             {renderGrid('rec')}
@@ -264,10 +298,30 @@ export default function OrganizerView({ shareLink, onBack }) {
         {selectedInfo && (
           <div className="org-detail">
             <div className="org-detail-title">
-              {selectedRecommended ? '★ ' : ''}
+              {selectedRank && <span className="org-rank-chip">{selectedRank}순위</span>}
               {fmtDate(selectedCell.date)} · {fmtRange(selectedInfo)}
             </div>
-            {selectedInfo.unavailable.length === 0 && selectedInfo.maybe.length === 0 ? (
+
+            {selectedRank ? (
+              <>
+                {requiredCount > 0 && (
+                  <p className="org-detail-line ok">✓ 필참 {requiredCount}명 전원 가능</p>
+                )}
+                {selectedInfo.unavailable.length === 0 && selectedInfo.maybe.length === 0 ? (
+                  <p className="org-detail-line ok">✓ 전원 참석 가능</p>
+                ) : (
+                  <>
+                    {selectedInfo.unavailable.length > 0 && (
+                      <p className="org-detail-line warn">⚠ 선택 인원 {selectedInfo.unavailable.length}명 불가</p>
+                    )}
+                    {selectedInfo.maybe.length > 0 && (
+                      <p className="org-detail-line warn">⚠ 피하고 싶은 사람 {selectedInfo.maybe.length}명</p>
+                    )}
+                  </>
+                )}
+                <p className="org-detail-line muted">🕐 {timeLabel(selectedCell.time)}</p>
+              </>
+            ) : selectedInfo.unavailable.length === 0 && selectedInfo.maybe.length === 0 ? (
               <p className="org-detail-line ok">모두 가능한 시간이에요 👍</p>
             ) : (
               <>

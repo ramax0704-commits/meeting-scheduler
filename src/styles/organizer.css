@@ -222,22 +222,47 @@
   opacity: 0.28;
 }
 
-/* 추천 탭: 추천 슬롯 별표, 나머지 흐림 */
+/* 추천 탭: 추천 슬롯 순위 번호, 나머지 흐림 */
 .org-cell.recommended {
-  border: 2px solid #f5a623;
+  border: 2px solid #4772fa;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.org-cell .rec-star {
-  color: #e8890c;
-  font-size: 14px;
+.org-cell .rec-rank-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background-color: #4772fa;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
 }
 
 .org-cell.rec-dim {
   opacity: 0.3;
+}
+
+/* 상세: 순위 칩, 부가 설명 */
+.org-rank-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  background-color: #4772fa;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-right: 8px;
+}
+
+.org-detail-line.muted {
+  color: #999;
 }
 
 .org-cell.selected {
