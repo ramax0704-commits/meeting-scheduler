@@ -535,26 +535,9 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
             </div>
           </div>
 
-          <div className="share-section">
-            <h4>조율자용</h4>
-            <p className="text-sm" style={{ marginBottom: '12px' }}>
-              참석자 응답이 모이면 아래에서 추천 시간을 확인할 수 있어요. 이 링크를 저장해두세요.
-            </p>
-            <div className="share-link">
-              <code>{`${window.location.origin}/result/${createdMeeting.share_link}`}</code>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `${window.location.origin}/result/${createdMeeting.share_link}`
-                  );
-                  alert('조율 결과 링크가 복사되었습니다!');
-                }}
-              >
-                복사
-              </button>
-            </div>
-          </div>
+          <p className="text-sm" style={{ marginBottom: '16px' }}>
+            이 링크 하나로 참석자는 응답하고, 응답 현황도 함께 볼 수 있어요.
+          </p>
 
           <div className="form-actions" style={{ flexDirection: 'column' }}>
             <button

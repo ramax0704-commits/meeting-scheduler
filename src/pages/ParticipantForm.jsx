@@ -11,7 +11,7 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const MIN_COLUMNS = 5; // 기본으로 항상 보여줄 날짜 칸 수
 const MAX_COLUMNS = 7; // 회의 생성 시 최대 7일까지 선택 가능하므로 상한도 7
 
-export default function ParticipantForm({ shareLink, onBack }) {
+export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
   const [meeting, setMeeting] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -223,7 +223,7 @@ export default function ParticipantForm({ shareLink, onBack }) {
             )}
           </div>
 
-          <div className="form-actions">
+          <div className="form-actions" style={{ flexDirection: 'column' }}>
             <button
               className="btn btn-primary"
               onClick={() => setPhase('time')}
@@ -231,6 +231,11 @@ export default function ParticipantForm({ shareLink, onBack }) {
             >
               다음 →
             </button>
+            {onViewResult && (
+              <button className="btn btn-secondary" onClick={onViewResult}>
+                📊 응답 현황 보기
+              </button>
+            )}
           </div>
         </div>
       </div>
