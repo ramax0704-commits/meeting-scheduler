@@ -1,0 +1,365 @@
+.organizer-view {
+  width: 100%;
+}
+
+/* 헤더 */
+.org-header {
+  margin-bottom: 16px;
+}
+
+.org-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.org-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+}
+
+.org-count {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4772fa;
+  background-color: #f0f7ff;
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+
+.org-subtitle {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 필참 강조 토글 */
+.org-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  background-color: white;
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.org-filter.on {
+  border-color: #4772fa;
+  background-color: #f7faff;
+}
+
+.org-switch {
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #d5d5d5;
+  flex-shrink: 0;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.org-switch.on {
+  background-color: #4772fa;
+}
+
+.org-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  transition: transform 0.2s;
+}
+
+.org-switch.on .org-knob {
+  transform: translateX(16px);
+}
+
+/* 그리드 */
+.org-grid {
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  padding: 12px 12px 4px;
+  margin-bottom: 12px;
+}
+
+.org-grid-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.org-date-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding-bottom: 4px;
+}
+
+.org-dow {
+  font-size: 11px;
+  color: #999;
+}
+
+.org-dnum {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.org-date-head.inactive .org-dow,
+.org-date-head.inactive .org-dnum {
+  color: #ccc;
+}
+
+.org-grid-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.org-grid-row {
+  display: grid;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.org-time-label {
+  text-align: right;
+  padding-right: 4px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+}
+
+.org-cell {
+  height: 34px;
+  border: 1px solid #efefef;
+  border-radius: 6px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.org-cell.placeholder {
+  background-color: transparent;
+  border: 1px dashed #eee;
+  cursor: default;
+}
+
+/* 히트맵 색상: 진할수록 안 되는 사람 많음 */
+.org-cell.heat-free {
+  background-color: #d9ecd6;
+  border-color: #c5e0c0;
+}
+
+.org-cell.heat-maybe {
+  background-color: #fbe6c2;
+  border-color: #f4d59e;
+}
+
+.org-cell.heat-red-1 {
+  background-color: #f6cfcf;
+  border-color: #eeb5b5;
+}
+
+.org-cell.heat-red-2 {
+  background-color: #ec9f9f;
+  border-color: #e28787;
+}
+
+.org-cell.heat-red-3 {
+  background-color: #dd6b6b;
+  border-color: #d45656;
+}
+
+/* 필참 전원 가능 강조(파란 테두리) */
+.org-cell.req-ok {
+  border: 2px solid #4772fa;
+}
+
+.org-cell.dimmed {
+  opacity: 0.28;
+}
+
+.org-cell.selected {
+  outline: 2px solid #333;
+  outline-offset: 1px;
+}
+
+/* 범례 */
+.org-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.org-legend .lg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.org-legend .sw {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.org-legend .sw.heat-free {
+  background-color: #d9ecd6;
+}
+
+.org-legend .sw.heat-maybe {
+  background-color: #fbe6c2;
+}
+
+.org-legend .sw.heat-red-2 {
+  background-color: #ec9f9f;
+}
+
+.org-legend .sw.req-ok {
+  background-color: white;
+  border: 2px solid #4772fa;
+}
+
+/* 선택 슬롯 상세 */
+.org-detail {
+  margin-top: 14px;
+  padding: 14px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+.org-detail-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.org-detail-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #444;
+}
+
+.org-detail-line .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.org-detail-line .dot.unavailable {
+  background-color: #f0524b;
+}
+
+.org-detail-line .dot.maybe {
+  background-color: #f5a623;
+}
+
+/* 추천 시간 */
+.org-rec-card {
+  margin-top: 16px;
+}
+
+.org-rec-sub {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rec-card {
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.rec-card.top {
+  border: 2px solid #4772fa;
+  background-color: #f7faff;
+}
+
+.rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.rec-time {
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+}
+
+.rec-rank {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4772fa;
+  background-color: #eef3ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.rec-card.top .rec-rank {
+  color: white;
+  background-color: #4772fa;
+}
+
+.rec-reasons {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rec-reasons li {
+  font-size: 13px;
+  padding-left: 20px;
+  position: relative;
+  color: #444;
+}
+
+.rec-reasons li.ok::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #22a06b;
+  font-weight: 700;
+}
+
+.rec-reasons li.warn::before {
+  content: '⚠';
+  position: absolute;
+  left: 0;
+  color: #f5a623;
+}

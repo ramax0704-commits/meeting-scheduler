@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createMeeting, createTimeSlots } from '../utils/api';
 import dayjs from 'dayjs';
 
-export default function CreateMeeting({ onSuccess, onBack }) {
+export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -535,8 +535,35 @@ export default function CreateMeeting({ onSuccess, onBack }) {
             </div>
           </div>
 
-          <div className="form-actions">
-            <button className="btn btn-primary" onClick={onSuccess}>
+          <div className="share-section">
+            <h4>조율자용</h4>
+            <p className="text-sm" style={{ marginBottom: '12px' }}>
+              참석자 응답이 모이면 아래에서 추천 시간을 확인할 수 있어요. 이 링크를 저장해두세요.
+            </p>
+            <div className="share-link">
+              <code>{`${window.location.origin}/result/${createdMeeting.share_link}`}</code>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/result/${createdMeeting.share_link}`
+                  );
+                  alert('조율 결과 링크가 복사되었습니다!');
+                }}
+              >
+                복사
+              </button>
+            </div>
+          </div>
+
+          <div className="form-actions" style={{ flexDirection: 'column' }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => onViewResult && onViewResult(createdMeeting.share_link)}
+            >
+              응답 현황 보기
+            </button>
+            <button className="btn btn-secondary" onClick={onSuccess}>
               처음으로 돌아가기
             </button>
           </div>

@@ -3,22 +3,27 @@ import './App.css';
 import './styles/globals.css';
 import './styles/create-meeting.css';
 import './styles/participant-form.css';
+import './styles/organizer.css';
 import CreateMeeting from './pages/CreateMeeting';
 import ParticipantForm from './pages/ParticipantForm';
+import OrganizerView from './pages/OrganizerView';
 
 function App() {
   const [page, setPage] = useState('home');
   const [shareLink, setShareLink] = useState(null);
 
   useEffect(() => {
-    // URL에서 /meeting/[shareLink] 패턴 확인
+    // URL 패턴 확인: /result/[link] = 조율자 결과, /meeting/[link] = 참석자 응답
     const path = window.location.pathname;
-    console.log('Current path:', path);
 
-    if (path.includes('/meeting/')) {
+    if (path.includes('/result/')) {
+      const link = path.split('/result/')[1];
+      if (link && link.trim()) {
+        setShareLink(link);
+        setPage('organizer');
+      }
+    } else if (path.includes('/meeting/')) {
       const link = path.split('/meeting/')[1];
-      console.log('Extracted link:', link);
-
       if (link && link.trim()) {
         setShareLink(link);
         setPage('participant');
@@ -71,7 +76,14 @@ function App() {
 
         {page === 'create' && (
           <div className="create-page">
-            <CreateMeeting onSuccess={() => setPage('home')} onBack={() => setPage('home')} />
+            <CreateMeeting
+              onSuccess={() => setPage('home')}
+              onBack={() => setPage('home')}
+              onViewResult={(link) => {
+                setShareLink(link);
+                setPage('organizer');
+              }}
+            />
           </div>
         )}
 
@@ -81,6 +93,12 @@ function App() {
               shareLink={shareLink}
               onBack={() => setPage('home')}
             />
+          </div>
+        )}
+
+        {page === 'organizer' && shareLink && (
+          <div className="participant-page">
+            <OrganizerView shareLink={shareLink} onBack={() => setPage('home')} />
           </div>
         )}
       </main>
