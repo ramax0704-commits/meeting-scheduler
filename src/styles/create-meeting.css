@@ -252,18 +252,8 @@
   }
 }
 
-/* 범위 중간 날짜: 연한 밴드 */
-.week-day.in-range {
-  background-color: #f0f7ff;
-}
-
-.week-day.in-range .week-day-date {
-  color: #4772fa;
-}
-
-/* 시작/끝 날짜: 날짜 원만 파랑으로 채움 */
-.week-day.selected-start .week-day-date,
-.week-day.selected-end .week-day-date {
+/* 선택된 날짜: 날짜 원만 파랑으로 채움 (요일 라벨은 그대로) */
+.week-day.selected .week-day-date {
   background-color: #4772fa;
   color: #fff;
 }
@@ -344,18 +334,11 @@
   }
 }
 
-.calendar-day.selected-start,
-.calendar-day.selected-end {
+.calendar-day.selected {
   background-color: #4772fa;
   color: white;
   border: 1px solid #4772fa;
   font-weight: 500;
-}
-
-.calendar-day.in-range {
-  background-color: #f0f7ff;
-  color: #4772fa;
-  border: 1px solid transparent;
 }
 
 /* 회의 길이 버튼 */

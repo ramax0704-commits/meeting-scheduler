@@ -70,6 +70,15 @@ select {
   width: 100%;
 }
 
+/* 카드 안 섹션 제목과 바로 아래 내용 사이 간격 확보 */
+.card h3 {
+  margin-bottom: 16px;
+}
+
+.card h4 {
+  margin-bottom: 12px;
+}
+
 @media (max-width: 640px) {
   .card {
     /* 모바일에서 제목이 위에, 버튼이 아래에 바짝 붙지 않도록 여백 확보 */

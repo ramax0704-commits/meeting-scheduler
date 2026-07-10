@@ -7,8 +7,9 @@ export default function CreateMeeting({ onSuccess, onBack }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [datePickerMode, setDatePickerMode] = useState('week');
-  const [dateSelectStart, setDateSelectStart] = useState(null);
-  const [dateSelectEnd, setDateSelectEnd] = useState(null);
+  // 날짜를 개별적으로 선택 (연속 범위가 아니라 원하는 날짜만 골라 담기). 최대 7일.
+  const [selectedDates, setSelectedDates] = useState(new Set());
+  const MAX_DATES = 7;
 
   // 기본정보 (조율자명 제거, 회의길이 추가)
   const [formData, setFormData] = useState({
@@ -70,46 +71,23 @@ export default function CreateMeeting({ onSuccess, onBack }) {
     setParticipants(participants.filter((p) => p.id !== id));
   };
 
-  // 날짜 선택 처리
+  // 날짜 선택 처리 - 개별 토글 (최대 7일)
   const handleDateClick = (date) => {
-    const selectedDate = dayjs(date).format('YYYY-MM-DD');
-
-    if (selectedDate === dateSelectStart && !dateSelectEnd) {
-      setDateSelectStart(null);
-      return;
-    }
-
-    if (selectedDate === dateSelectStart && selectedDate === dateSelectEnd) {
-      setDateSelectStart(null);
-      setDateSelectEnd(null);
-      return;
-    }
-
-    if (!dateSelectStart) {
-      setDateSelectStart(selectedDate);
-      setDateSelectEnd(null);
-    } else if (!dateSelectEnd) {
-      if (dayjs(selectedDate).isBefore(dayjs(dateSelectStart))) {
-        setDateSelectStart(selectedDate);
-        setDateSelectEnd(null);
+    const d = dayjs(date).format('YYYY-MM-DD');
+    setError(null);
+    setSelectedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(d)) {
+        next.delete(d);
       } else {
-        // 최대 7일까지만 선택 가능
-        const daysDiff = dayjs(selectedDate).diff(dayjs(dateSelectStart), 'day');
-        if (daysDiff > 6) {
-          setError('최대 7일까지만 선택 가능합니다');
-          return;
+        if (next.size >= MAX_DATES) {
+          setError(`최대 ${MAX_DATES}일까지만 선택할 수 있어요`);
+          return prev;
         }
-        setDateSelectEnd(selectedDate);
-        setFormData((prev) => ({
-          ...prev,
-          start_date: dateSelectStart,
-          end_date: selectedDate,
-        }));
+        next.add(d);
       }
-    } else {
-      setDateSelectStart(selectedDate);
-      setDateSelectEnd(null);
-    }
+      return next;
+    });
   };
 
   // 주간 선택 렌더링
@@ -127,18 +105,12 @@ export default function CreateMeeting({ onSuccess, onBack }) {
           {days.map((day) => {
             const dateStr = day.format('YYYY-MM-DD');
             const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][day.day()];
-            const isStart = dateStr === dateSelectStart;
-            const isEnd = dateStr === dateSelectEnd;
-            const isInRange =
-              dateSelectStart &&
-              dateSelectEnd &&
-              dayjs(dateStr).isAfter(dayjs(dateSelectStart)) &&
-              dayjs(dateStr).isBefore(dayjs(dateSelectEnd));
+            const isSelected = selectedDates.has(dateStr);
 
             return (
               <button
                 key={dateStr}
-                className={`week-day ${isStart ? 'selected-start' : ''} ${isEnd ? 'selected-end' : ''} ${isInRange ? 'in-range' : ''}`}
+                className={`week-day ${isSelected ? 'selected' : ''}`}
                 onClick={() => handleDateClick(dateStr)}
               >
                 <div className="week-day-label">{dayOfWeek}</div>
@@ -192,18 +164,12 @@ export default function CreateMeeting({ onSuccess, onBack }) {
                   return <div key={dayIdx} className="calendar-day empty"></div>;
                 }
                 const dateStr = today.date(day).format('YYYY-MM-DD');
-                const isStart = dateStr === dateSelectStart;
-                const isEnd = dateStr === dateSelectEnd;
-                const isInRange =
-                  dateSelectStart &&
-                  dateSelectEnd &&
-                  dayjs(dateStr).isAfter(dayjs(dateSelectStart)) &&
-                  dayjs(dateStr).isBefore(dayjs(dateSelectEnd));
+                const isSelected = selectedDates.has(dateStr);
 
                 return (
                   <div
                     key={dayIdx}
-                    className={`calendar-day active ${isStart ? 'selected-start' : ''} ${isEnd ? 'selected-end' : ''} ${isInRange ? 'in-range' : ''}`}
+                    className={`calendar-day active ${isSelected ? 'selected' : ''}`}
                     onClick={() => handleDateClick(dateStr)}
                   >
                     {day}
@@ -226,6 +192,12 @@ export default function CreateMeeting({ onSuccess, onBack }) {
         return;
       }
     }
+    if (step === 2) {
+      if (selectedDates.size === 0) {
+        setError('회의 후보 날짜를 하나 이상 선택해주세요');
+        return;
+      }
+    }
     if (step === 3) {
       const filledParticipants = participants.filter((p) => p.name.trim());
       if (filledParticipants.length < 2) {
@@ -242,8 +214,13 @@ export default function CreateMeeting({ onSuccess, onBack }) {
     setError(null);
 
     try {
+      // 선택한 날짜들을 정렬. start/end는 최소·최대 날짜로 저장(참석자 화면은 실제 슬롯 날짜를 사용)
+      const sortedDates = [...selectedDates].sort();
+
       const { success, data: meeting } = await createMeeting({
         ...formData,
+        start_date: sortedDates[0],
+        end_date: sortedDates[sortedDates.length - 1],
         organizer_name: participants[0]?.name || '조율자',
         participants: participants.map((p) => ({
           id: p.id,
@@ -258,13 +235,10 @@ export default function CreateMeeting({ onSuccess, onBack }) {
       }
 
       const slots = generateTimeSlots(
-        formData.start_date,
-        formData.end_date,
+        sortedDates,
         formData.time_start,
         formData.time_end,
-        formData.duration_minutes,
-        formData.is_recurring,
-        formData.recurrence_days
+        formData.duration_minutes
       );
 
       const { success: slotsSuccess } = await createTimeSlots(meeting.id, slots);
@@ -283,13 +257,11 @@ export default function CreateMeeting({ onSuccess, onBack }) {
     }
   };
 
-  // 시간 슬롯 생성 로직
-  const generateTimeSlots = (startDate, endDate, timeStart, timeEnd, duration, isRecurring, recurrenceDays) => {
+  // 시간 슬롯 생성 로직 - 선택한 날짜(dates 배열)마다 시간대별 슬롯 생성
+  const generateTimeSlots = (dates, timeStart, timeEnd, duration) => {
     const slots = [];
-    let currentDate = dayjs(startDate);
-    const endDateObj = dayjs(endDate);
 
-    while (currentDate.isBefore(endDateObj) || currentDate.isSame(endDateObj)) {
+    dates.forEach((dateStr) => {
       for (let hour = timeStart; hour < timeEnd; hour++) {
         const startMinutes = hour * 60;
         const endMinutes = startMinutes + duration;
@@ -297,19 +269,13 @@ export default function CreateMeeting({ onSuccess, onBack }) {
 
         if (endHour <= timeEnd) {
           slots.push({
-            date: currentDate.format('YYYY-MM-DD'),
+            date: dateStr,
             startTime: `${String(hour).padStart(2, '0')}:00:00`,
             endTime: `${String(endHour).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}:00`,
           });
         }
       }
-
-      if (isRecurring) {
-        currentDate = currentDate.add(recurrenceDays, 'day');
-      } else {
-        currentDate = currentDate.add(1, 'day');
-      }
-    }
+    });
 
     return slots;
   };
@@ -403,35 +369,23 @@ export default function CreateMeeting({ onSuccess, onBack }) {
           <h3>후보 일시</h3>
 
           <div className="form-group">
-            <label>기간 선택</label>
+            <label>기간 선택 (원하는 날짜를 눌러 선택, 최대 {MAX_DATES}일)</label>
             <div className="date-mode-buttons">
               <button
                 className={`btn ${datePickerMode === 'week' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => {
-                  setDatePickerMode('week');
-                  setDateSelectStart(null);
-                  setDateSelectEnd(null);
-                }}
+                onClick={() => setDatePickerMode('week')}
               >
                 이번주
               </button>
               <button
                 className={`btn ${datePickerMode === 'nextweek' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => {
-                  setDatePickerMode('nextweek');
-                  setDateSelectStart(null);
-                  setDateSelectEnd(null);
-                }}
+                onClick={() => setDatePickerMode('nextweek')}
               >
                 다음주
               </button>
               <button
                 className={`btn ${datePickerMode === 'month' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => {
-                  setDatePickerMode('month');
-                  setDateSelectStart(null);
-                  setDateSelectEnd(null);
-                }}
+                onClick={() => setDatePickerMode('month')}
               >
                 월간
               </button>
@@ -466,18 +420,6 @@ export default function CreateMeeting({ onSuccess, onBack }) {
                 </select>
               </div>
             </div>
-          </div>
-
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                name="is_recurring"
-                checked={formData.is_recurring}
-                onChange={handleInputChange}
-              />
-              매주 반복
-            </label>
           </div>
 
           <div className="form-actions">

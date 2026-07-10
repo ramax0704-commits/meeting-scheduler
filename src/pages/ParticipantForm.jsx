@@ -6,9 +6,6 @@ import {
   getMeetingResponses,
 } from '../utils/api';
 import dayjs from 'dayjs';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-
-dayjs.extend(isSameOrBefore);
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const MIN_COLUMNS = 5; // 기본으로 항상 보여줄 날짜 칸 수
@@ -83,26 +80,13 @@ export default function ParticipantForm({ shareLink, onBack }) {
     }
   };
 
-  // 회의 기간(start_date~end_date) 안의 모든 날짜를 순서대로 생성
-  const getAllDatesInRange = () => {
-    const dates = [];
-    let current = dayjs(meeting.start_date);
-    const end = dayjs(meeting.end_date);
-
-    while (current.isSameOrBefore(end)) {
-      dates.push(current.format('YYYY-MM-DD'));
-      current = current.add(1, 'day');
-    }
-
-    return dates;
-  };
-
   // 데이터를 다 불러오기 전에는 아래 화면 계산을 하지 않는다 (meeting이 null이면 에러 방지)
   if (loading) return <div className="card">로드 중...</div>;
   if (error) return <div className="card error-message">{error}</div>;
   if (!meeting) return <div className="card">회의를 찾을 수 없습니다.</div>;
 
-  const meetingDates = getAllDatesInRange();
+  // 실제 생성된 슬롯의 날짜들(개별 선택이라 연속이 아닐 수 있음)
+  const meetingDates = [...new Set(timeSlots.map((slot) => slot.slot_date))].sort();
   const hours = [...new Set(timeSlots.map((slot) => slot.start_time))].sort();
 
   // 이름이 채워진 참석자만 목록에 노출
@@ -110,7 +94,7 @@ export default function ParticipantForm({ shareLink, onBack }) {
 
   // 그리드 날짜 칸: 기본 5칸, 실제 날짜가 6~7일이면 그만큼 늘림
   const columnCount = Math.min(MAX_COLUMNS, Math.max(MIN_COLUMNS, meetingDates.length));
-  const lastDate = meetingDates[meetingDates.length - 1];
+  const lastDate = meetingDates[meetingDates.length - 1] || dayjs().format('YYYY-MM-DD');
   const columns = Array.from({ length: columnCount }, (_, i) => {
     if (i < meetingDates.length) {
       return { date: meetingDates[i], active: true };
@@ -330,7 +314,7 @@ export default function ParticipantForm({ shareLink, onBack }) {
           </div>
         </div>
 
-        <p className="pf-scroll-hint">↕ 위아래로 스크롤하면 모든 시간을 볼 수 있어요</p>
+        <p className="pf-scroll-hint">위아래로 스크롤하면 모든 시간을 볼 수 있어요</p>
 
         {/* 한마디 입력 */}
         <div className="form-group">
