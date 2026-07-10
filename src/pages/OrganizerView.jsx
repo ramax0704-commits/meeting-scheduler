@@ -16,6 +16,7 @@ export default function OrganizerView({ shareLink, onBack }) {
   const [tab, setTab] = useState('status'); // 'status'(응답 현황) | 'rec'(추천 시간)
   const [onlyRequired, setOnlyRequired] = useState(false); // 필참 전원 가능만 강조
   const [selectedCell, setSelectedCell] = useState(null); // 탭한 셀 {date, time}
+  const [timePref, setTimePref] = useState('any'); // 추천 시간대 선호: any | morning | afternoon
 
   useEffect(() => {
     loadData();
@@ -108,14 +109,22 @@ export default function OrganizerView({ shareLink, onBack }) {
   const fmtDate = (date) => `${dayjs(date).format('M월 D일')} (${WEEKDAYS[dayjs(date).day()]})`;
   const fmtRange = (info) => `${info.slot.start_time.slice(0, 5)}~${info.slot.end_time.slice(0, 5)}`;
 
-  // 시간대 선호 점수 (오후 우대, 점심/늦은 시간 감점)
+  // 시간대 선호 점수 (조율자가 결과 화면에서 선택: 오전/오후/상관없음)
   const timeBonus = (startTime) => {
     const h = parseInt(startTime.slice(0, 2), 10);
-    if (h >= 13 && h <= 16) return 20; // 오후 (선호)
-    if (h >= 10 && h <= 11) return 10; // 늦은 오전
-    if (h === 12) return -5; // 점심
-    if (h >= 17) return -5; // 늦은 시간
-    return 0; // 이른 아침
+    if (timePref === 'morning') {
+      if (h >= 9 && h <= 11) return 20; // 오전 선호
+      if (h === 12) return -5; // 점심
+      if (h >= 13) return -10; // 오후 감점
+      return 5; // 이른 아침
+    }
+    if (timePref === 'afternoon') {
+      if (h >= 13 && h <= 16) return 20; // 오후 선호
+      if (h === 17) return 5;
+      if (h === 12) return -5; // 점심
+      return -10; // 오전 감점
+    }
+    return 0; // 상관없음: 시간대 가점 없음
   };
   const timeLabel = (startTime) => {
     const h = parseInt(startTime.slice(0, 2), 10);
@@ -290,6 +299,31 @@ export default function OrganizerView({ shareLink, onBack }) {
                 필참자가 가능한 시간 중 좋은 순으로 최대 5곳이에요. 번호를 눌러 이유를 확인하세요.
               </p>
             )}
+
+            {responses.length > 0 && (
+              <div className="org-timepref">
+                <span className="org-timepref-label">시간대 선호</span>
+                <div className="org-seg">
+                  {[
+                    { v: 'morning', t: '오전' },
+                    { v: 'afternoon', t: '오후' },
+                    { v: 'any', t: '상관없음' },
+                  ].map((o) => (
+                    <button
+                      key={o.v}
+                      className={timePref === o.v ? 'active' : ''}
+                      onClick={() => {
+                        setTimePref(o.v);
+                        setSelectedCell(null);
+                      }}
+                    >
+                      {o.t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {renderGrid('rec')}
           </>
         )}

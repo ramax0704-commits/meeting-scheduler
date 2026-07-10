@@ -114,6 +114,49 @@
   transform: translateX(16px);
 }
 
+/* 시간대 선호 세그먼트 컨트롤 */
+.org-timepref {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.org-timepref-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  flex-shrink: 0;
+}
+
+.org-seg {
+  display: flex;
+  flex: 1;
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.org-seg button {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.org-seg button.active {
+  background-color: white;
+  color: #4772fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 /* 그리드 */
 .org-grid {
   border: 1px solid #efefef;
