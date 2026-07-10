@@ -33,7 +33,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 /* 홈페이지 스타일 - 중앙 정렬 */
@@ -50,6 +50,12 @@
 
 /* 회의 참가 페이지 - 중앙 정렬 */
 .view-page {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* 참석자 응답 페이지 - 중앙 정렬 (회의 생성 화면과 동일한 폭) */
+.participant-page {
   width: 100%;
   max-width: 480px;
 }
