@@ -93,9 +93,20 @@
   padding: 12px;
   border: 1px solid #efefef;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 16px;
   font-family: inherit;
   resize: vertical;
+}
+
+/* 셀렉트: iOS 기본 회색 배경 제거 → 흰 배경 + 커스텀 화살표 */
+.form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
 }
 
 .form-group input:focus,
@@ -145,8 +156,6 @@
 .form-row.time-range select {
   text-align: left;
   padding-left: 12px;
-  padding-right: 40px;
-  background-position: right 12px center;
 }
 
 .form-actions {
@@ -204,50 +213,59 @@
 }
 
 .week-day {
-  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  min-width: 0;
   border-radius: 8px;
   border: none;
-  background-color: white;
+  background-color: transparent;
+  color: #000;
   cursor: pointer;
-  transition: all 0.2s;
-  padding: 8px;
+  transition: background-color 0.15s;
+  padding: 6px 0;
 }
 
 .week-day-label {
   font-size: 11px;
   color: #999;
-  margin-bottom: 4px;
 }
 
+/* 날짜 숫자: 선택 시 이 원(circle)만 채워짐 (요일 라벨은 그대로) */
 .week-day-date {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
+  color: #000;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
-.week-day:hover {
-  background-color: #f9f9f9;
+/* hover는 마우스 기기에서만 (모바일 탭 후 hover가 눌러붙어 색이 덮이는 문제 방지) */
+@media (hover: hover) {
+  .week-day:hover .week-day-date {
+    background-color: #f0f0f0;
+  }
 }
 
-.week-day.selected-start,
-.week-day.selected-end {
-  background-color: #4772fa;
-  color: white;
-  border: 1px solid #4772fa;
-}
-
-.week-day.selected-start .week-day-label,
-.week-day.selected-end .week-day-label {
-  color: rgba(255, 255, 255, 0.8);
-}
-
+/* 범위 중간 날짜: 연한 밴드 */
 .week-day.in-range {
   background-color: #f0f7ff;
+}
+
+.week-day.in-range .week-day-date {
   color: #4772fa;
-  border: 1px solid transparent;
+}
+
+/* 시작/끝 날짜: 날짜 원만 파랑으로 채움 */
+.week-day.selected-start .week-day-date,
+.week-day.selected-end .week-day-date {
+  background-color: #4772fa;
+  color: #fff;
 }
 
 /* 월간 캘린더 */
@@ -319,8 +337,11 @@
   color: #ccc;
 }
 
-.calendar-day.active:hover {
-  background-color: #f9f9f9;
+/* hover는 마우스 기기에서만 (모바일에서 탭 후 hover가 눌러붙어 선택 날짜를 흰색으로 덮는 문제 방지) */
+@media (hover: hover) {
+  .calendar-day.active:hover {
+    background-color: #f9f9f9;
+  }
 }
 
 .calendar-day.selected-start,
@@ -407,6 +428,12 @@
   gap: 6px;
   border-radius: 12px;
   padding: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-btn {
+  text-align: center;
 }
 
 /* 선택 활성화 상태 */
@@ -569,33 +596,35 @@
 }
 
 @media (max-width: 640px) {
-  .form-row {
-    grid-template-columns: 1fr;
+  /* 회의 시간 범위(시작/종료)는 모바일에서도 가로로 나란히 유지 */
+  .form-row.time-range {
+    grid-template-columns: 1fr 1fr;
   }
 
   .form-actions {
     flex-direction: column-reverse;
   }
 
+  /* 이번주/다음주/월간은 한 줄에 나란히 */
   .date-mode-buttons {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .duration-buttons {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .week-picker {
+    padding: 12px 8px;
+  }
+
   .week-days {
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 2px;
   }
 
   .week-day {
-    padding: 4px;
-  }
-
-  .week-day-date {
-    font-size: 14px;
+    padding: 2px;
   }
 
   .participant-row {

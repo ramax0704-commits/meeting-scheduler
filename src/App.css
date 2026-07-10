@@ -120,11 +120,16 @@ input:focus {
   }
 
   .app-main {
-    padding: 24px 16px;
+    padding: 16px 16px;
   }
 
   .card {
-    padding: 12px;
+    padding: 20px 16px;
+  }
+
+  /* 회의 만들기 / 참석자 화면에서는 모바일에서 상단 헤더 숨김 (공간 절약) */
+  .app-header.header-hidden-mobile {
+    display: none;
   }
 
   .app-footer {

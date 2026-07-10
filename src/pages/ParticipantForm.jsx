@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
-import { getMeetingByLink, getTimeSlots, saveParticipantResponse } from '../utils/api';
+import { useState, useEffect, useRef } from 'react';
+import {
+  getMeetingByLink,
+  getTimeSlots,
+  saveParticipantResponse,
+  getMeetingResponses,
+} from '../utils/api';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
@@ -23,13 +28,31 @@ export default function ParticipantForm({ shareLink, onBack }) {
   // 셀마다 상태를 따로 저장 { [cellId]: 'unavailable' | 'maybe' } — 두 상태가 서로 덮어쓰지 않도록
   const [cellStatus, setCellStatus] = useState({});
   const [comment, setComment] = useState(''); // 한마디 (선택)
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragMode, setDragMode] = useState('paint'); // 드래그 중 동작: paint(칠하기) / erase(지우기)
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [respondedNames, setRespondedNames] = useState(new Set()); // 이미 응답한 참석자 이름
+
+  // 드래그 상태는 ref로 관리(포인터 이벤트에서 최신값을 바로 읽기 위해)
+  const draggingRef = useRef(false);
+  const dragModeRef = useRef('paint'); // paint(칠하기) / erase(지우기)
+  const selectedStatusRef = useRef(selectedStatus);
+  selectedStatusRef.current = selectedStatus;
 
   useEffect(() => {
     loadMeetingData();
   }, [shareLink]);
+
+  // 드래그 도중 그리드 밖에서 손을 떼도 드래그가 확실히 끝나도록
+  useEffect(() => {
+    const end = () => {
+      draggingRef.current = false;
+    };
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    return () => {
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+  }, []);
 
   const loadMeetingData = async () => {
     try {
@@ -45,6 +68,12 @@ export default function ParticipantForm({ shareLink, onBack }) {
       const { success: slotsSuccess, data: slotsData } = await getTimeSlots(meetingData.id);
       if (slotsSuccess) {
         setTimeSlots(slotsData);
+      }
+
+      // 이미 응답한 참석자 목록 (응답 완료 / 미응답 구분용)
+      const { success: respSuccess, data: respData } = await getMeetingResponses(meetingData.id);
+      if (respSuccess) {
+        setRespondedNames(new Set(respData.map((r) => r.participant_name)));
       }
     } catch (err) {
       setError('데이터를 불러올 수 없습니다.');
@@ -94,31 +123,42 @@ export default function ParticipantForm({ shareLink, onBack }) {
 
   const getCellId = (date, time) => `${date}-${time}`;
 
-  const handleCellMouseDown = (date, time) => {
-    const cellId = getCellId(date, time);
-    // 시작 셀이 이미 현재 붓 색이면 '지우기' 모드, 아니면 '칠하기' 모드로 드래그
-    const mode = cellStatus[cellId] === selectedStatus ? 'erase' : 'paint';
-    setDragMode(mode);
-    setIsDragging(true);
-    applyCell(cellId, mode);
-  };
-
-  const handleCellMouseEnter = (date, time) => {
-    if (isDragging) {
-      applyCell(getCellId(date, time), dragMode);
-    }
-  };
-
   const applyCell = (cellId, mode) => {
     setCellStatus((prev) => {
       const next = { ...prev };
       if (mode === 'erase') {
         delete next[cellId];
       } else {
-        next[cellId] = selectedStatus; // 현재 붓 색으로 칠함(다른 색이었으면 덮어씀)
+        next[cellId] = selectedStatusRef.current; // 현재 붓 색으로 칠함(다른 색이었으면 덮어씀)
       }
       return next;
     });
+  };
+
+  // 드래그 시작(마우스/터치/펜 공통 - pointerdown)
+  const handlePointerDown = (date, time) => {
+    const cellId = getCellId(date, time);
+    // 시작 셀이 이미 현재 붓 색이면 '지우기', 아니면 '칠하기' 모드로 드래그
+    const mode = cellStatus[cellId] === selectedStatus ? 'erase' : 'paint';
+    dragModeRef.current = mode;
+    draggingRef.current = true;
+    applyCell(cellId, mode);
+  };
+
+  // 드래그 이동: 터치는 pointermove가 시작 셀에만 오므로 손가락 아래 셀을 직접 찾는다
+  const handlePointerMove = (e) => {
+    if (!draggingRef.current) return;
+    e.preventDefault(); // 그리드 위에서 드래그하는 동안 페이지 세로 스크롤 방지
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = el && el.closest('[data-time]');
+    if (!cell) return;
+    const date = cell.getAttribute('data-day');
+    const time = cell.getAttribute('data-time');
+    applyCell(getCellId(date, time), dragModeRef.current);
+  };
+
+  const handlePointerUp = () => {
+    draggingRef.current = false;
   };
 
   const handleSubmit = async () => {
@@ -176,18 +216,24 @@ export default function ParticipantForm({ shareLink, onBack }) {
           <h4 className="pf-section-label">본인 이름을 선택해주세요</h4>
           <div className="name-select-list">
             {participantList.length > 0 ? (
-              participantList.map((p) => (
-                <button
-                  key={p.id}
-                  className={`name-option ${selectedParticipant === p.name ? 'selected' : ''}`}
-                  onClick={() => setSelectedParticipant(p.name)}
-                >
-                  <span className="name-option-name">{p.name}</span>
-                  <span className={`badge ${p.isRequired ? 'required' : 'optional'}`}>
-                    {p.isRequired ? '필수' : '선택'}
-                  </span>
-                </button>
-              ))
+              participantList.map((p) => {
+                const responded = respondedNames.has(p.name);
+                return (
+                  <button
+                    key={p.id}
+                    className={`name-option ${selectedParticipant === p.name ? 'selected' : ''}`}
+                    onClick={() => setSelectedParticipant(p.name)}
+                  >
+                    <span className="name-option-left">
+                      <span className="name-option-name">{p.name}</span>
+                      <span className="name-role">{p.isRequired ? '필수' : '선택'}</span>
+                    </span>
+                    <span className={`resp-chip ${responded ? 'done' : 'pending'}`}>
+                      {responded ? '✓ 응답 완료' : '미응답'}
+                    </span>
+                  </button>
+                );
+              })
             ) : (
               <p className="text-sm">등록된 참석자가 없습니다.</p>
             )}
@@ -245,7 +291,7 @@ export default function ParticipantForm({ shareLink, onBack }) {
         </div>
 
         {/* 그리드 (날짜 헤더 고정 + 시간 세로 스크롤) */}
-        <div className="pf-grid" onMouseLeave={() => setIsDragging(false)} onMouseUp={() => setIsDragging(false)}>
+        <div className="pf-grid">
           <div className="pf-grid-header" style={{ gridTemplateColumns }}>
             <div className="pf-corner"></div>
             {columns.map((col, idx) => (
@@ -256,7 +302,11 @@ export default function ParticipantForm({ shareLink, onBack }) {
             ))}
           </div>
 
-          <div className="pf-grid-scroll">
+          <div
+            className="pf-grid-scroll"
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
             {hours.map((time) => (
               <div key={time} className="pf-grid-row" style={{ gridTemplateColumns }}>
                 <div className="pf-time-label">{time.substring(0, 5)}</div>
@@ -269,8 +319,9 @@ export default function ParticipantForm({ shareLink, onBack }) {
                     <div
                       key={idx}
                       className={`pf-cell ${status ? `selected-${status}` : ''}`}
-                      onMouseDown={() => handleCellMouseDown(col.date, time)}
-                      onMouseEnter={() => handleCellMouseEnter(col.date, time)}
+                      data-day={col.date}
+                      data-time={time}
+                      onPointerDown={() => handlePointerDown(col.date, time)}
                     />
                   );
                 })}

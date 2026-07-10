@@ -28,7 +28,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
+      <header className={`app-header ${page !== 'home' ? 'header-hidden-mobile' : ''}`}>
         <h1 className="app-title">회의 일정 조율</h1>
         <p className="app-subtitle">모두가 참석 가능한 시간을 함께 찾아봅시다</p>
       </header>

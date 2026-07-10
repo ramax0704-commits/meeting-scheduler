@@ -504,27 +504,18 @@ export default function CreateMeeting({ onSuccess, onBack }) {
                   className="participant-name-input"
                 />
 
-                <div className={`toggle-group ${participant.isRequired ? 'required' : 'optional'}`}>
-                  <button
-                    className={`toggle-btn ${!participant.isRequired ? 'active' : ''}`}
-                    onClick={() => {
-                      if (participant.isRequired) {
-                        handleParticipantToggle(participant.id);
-                      }
-                    }}
-                  >
+                <div
+                  className={`toggle-group ${participant.isRequired ? 'required' : 'optional'}`}
+                  onClick={() => handleParticipantToggle(participant.id)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <span className={`toggle-btn ${!participant.isRequired ? 'active' : ''}`}>
                     선택
-                  </button>
-                  <button
-                    className={`toggle-btn ${participant.isRequired ? 'active' : ''}`}
-                    onClick={() => {
-                      if (!participant.isRequired) {
-                        handleParticipantToggle(participant.id);
-                      }
-                    }}
-                  >
+                  </span>
+                  <span className={`toggle-btn ${participant.isRequired ? 'active' : ''}`}>
                     필수
-                  </button>
+                  </span>
                 </div>
 
                 {participants.length > 1 && (

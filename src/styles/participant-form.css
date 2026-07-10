@@ -61,10 +61,39 @@
   background-color: #f0f7ff;
 }
 
+.name-option-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .name-option-name {
   font-size: 15px;
   font-weight: 500;
   color: #000;
+}
+
+.name-role {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 응답 완료 / 미응답 칩 */
+.resp-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.resp-chip.done {
+  background-color: #e9f7ef;
+  color: #22a06b;
+}
+
+.resp-chip.pending {
+  background-color: #f5f5f5;
+  color: #999;
 }
 
 .name-option .badge {
@@ -242,11 +271,16 @@
   cursor: pointer;
   background-color: #fafafa;
   transition: background-color 0.1s;
+  /* 그리드 위 드래그 시 브라우저 스크롤이 개입하지 않도록(터치 페인팅) */
+  touch-action: none;
 }
 
-.pf-cell:hover {
-  background-color: #f0f0f0;
-  border-color: #ccc;
+/* hover는 마우스 기기에서만 (모바일 탭 후 hover 눌러붙음 방지) */
+@media (hover: hover) {
+  .pf-cell:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+  }
 }
 
 /* 비어있는(선택되지 않은 날짜) 자리 - 자리만 지킴 */
