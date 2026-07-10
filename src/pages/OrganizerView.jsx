@@ -215,12 +215,15 @@ export default function OrganizerView({ shareLink, onBack }) {
               <>
                 {selectedInfo.unavailable.length > 0 && (
                   <p className="org-detail-line bad">
-                    <span className="dot unavailable" /> 안 됨: {selectedInfo.unavailable.join(', ')}
+                    <span className="dot unavailable" /> 안 됨 {selectedInfo.unavailable.length}명
+                    {requiredCount > 0 && selectedInfo.requiredUnavailable.length > 0
+                      ? ` (필참 ${selectedInfo.requiredUnavailable.length}명 포함)`
+                      : ''}
                   </p>
                 )}
                 {selectedInfo.maybe.length > 0 && (
                   <p className="org-detail-line warn">
-                    <span className="dot maybe" /> 피하고 싶음: {selectedInfo.maybe.join(', ')}
+                    <span className="dot maybe" /> 피하고 싶음 {selectedInfo.maybe.length}명
                   </p>
                 )}
               </>
@@ -253,18 +256,14 @@ export default function OrganizerView({ shareLink, onBack }) {
                       <li className={info.requiredAllOk ? 'ok' : 'warn'}>
                         {info.requiredAllOk
                           ? `필참 ${requiredCount}명 전원 가능`
-                          : `필참 ${info.requiredUnavailable.length}명 불가 (${info.requiredUnavailable.join(', ')})`}
+                          : `필참 ${info.requiredUnavailable.length}명 불가`}
                       </li>
                     )}
                     <li className={info.unavailable.length === 0 ? 'ok' : 'warn'}>
-                      {info.unavailable.length === 0
-                        ? '안 되는 사람 0명'
-                        : `안 되는 사람 ${info.unavailable.length}명 (${info.unavailable.join(', ')})`}
+                      안 되는 사람 {info.unavailable.length}명
                     </li>
                     <li className={info.maybe.length === 0 ? 'ok' : 'warn'}>
-                      {info.maybe.length === 0
-                        ? '피하고 싶은 사람 0명'
-                        : `피하고 싶은 사람 ${info.maybe.length}명 (${info.maybe.join(', ')})`}
+                      피하고 싶은 사람 {info.maybe.length}명
                     </li>
                   </ul>
                 </div>

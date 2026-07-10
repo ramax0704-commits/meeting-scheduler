@@ -164,7 +164,10 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
 
       await Promise.all(slotPromises);
       alert('응답이 저장되었습니다!');
-      onBack();
+      // 홈이 아니라 공유링크 첫 화면(이름 선택)으로 복귀 + 방금 응답한 사람 '응답 완료'로 표시
+      setRespondedNames((prev) => new Set(prev).add(selectedParticipant));
+      setSelectedParticipant('');
+      setPhase('select');
     } catch (err) {
       alert('저장 중 오류가 발생했습니다.');
       console.error(err);

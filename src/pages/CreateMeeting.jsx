@@ -18,8 +18,8 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
     start_date: dayjs().format('YYYY-MM-DD'),
     end_date: dayjs().add(6, 'day').format('YYYY-MM-DD'),
     duration_minutes: 60,
-    time_start: 8,
-    time_end: 22,
+    time_start: 9,
+    time_end: 18,
     is_recurring: false,
     recurrence_days: 7,
   });
