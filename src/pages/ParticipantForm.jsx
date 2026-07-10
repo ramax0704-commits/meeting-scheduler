@@ -26,17 +26,41 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
   const [cellStatus, setCellStatus] = useState({});
   const [comment, setComment] = useState(''); // 한마디 (선택)
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allResponses, setAllResponses] = useState([]); // 모든 참석자 응답 원본
   const [respondedNames, setRespondedNames] = useState(new Set()); // 이미 응답한 참석자 이름
+  const [showScrollHint, setShowScrollHint] = useState(false); // 그리드 스크롤 가능할 때만 안내
 
   // 드래그 상태는 ref로 관리(포인터 이벤트에서 최신값을 바로 읽기 위해)
   const draggingRef = useRef(false);
   const dragModeRef = useRef('paint'); // paint(칠하기) / erase(지우기)
   const selectedStatusRef = useRef(selectedStatus);
   selectedStatusRef.current = selectedStatus;
+  const gridScrollRef = useRef(null);
 
   useEffect(() => {
     loadMeetingData();
   }, [shareLink]);
+
+  // 그리드가 실제로 넘칠 때(스크롤 가능 & 바닥 아님)만 스크롤 안내 표시
+  useEffect(() => {
+    const el = gridScrollRef.current;
+    if (!el) {
+      setShowScrollHint(false);
+      return;
+    }
+    const check = () => {
+      const scrollable = el.scrollHeight > el.clientHeight + 2;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+      setShowScrollHint(scrollable && !atBottom);
+    };
+    check();
+    el.addEventListener('scroll', check);
+    window.addEventListener('resize', check);
+    return () => {
+      el.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [phase, timeSlots.length]);
 
   // 드래그 도중 그리드 밖에서 손을 떼도 드래그가 확실히 끝나도록
   useEffect(() => {
@@ -67,9 +91,10 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
         setTimeSlots(slotsData);
       }
 
-      // 이미 응답한 참석자 목록 (응답 완료 / 미응답 구분용)
+      // 모든 응답 (응답 완료/미응답 구분 + 본인 기존 응답 불러오기용)
       const { success: respSuccess, data: respData } = await getMeetingResponses(meetingData.id);
       if (respSuccess) {
+        setAllResponses(respData);
         setRespondedNames(new Set(respData.map((r) => r.participant_name)));
       }
     } catch (err) {
@@ -106,6 +131,24 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
   const gridTemplateColumns = `44px repeat(${columnCount}, minmax(0, 1fr))`;
 
   const getCellId = (date, time) => `${date}-${time}`;
+
+  // 선택한 참석자의 '기존 응답'만 불러와 그리드 초기화 (다른 사람 응답이 남지 않도록)
+  const goToTime = () => {
+    const slotIdToCell = {};
+    timeSlots.forEach((s) => {
+      slotIdToCell[s.id] = getCellId(s.slot_date, s.start_time);
+    });
+    const mine = {};
+    allResponses
+      .filter((r) => r.participant_name === selectedParticipant)
+      .forEach((r) => {
+        const key = slotIdToCell[r.time_slot_id];
+        if (key) mine[key] = r.status;
+      });
+    setCellStatus(mine);
+    setComment('');
+    setPhase('time');
+  };
 
   const applyCell = (cellId, mode) => {
     setCellStatus((prev) => {
@@ -164,9 +207,17 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
 
       await Promise.all(slotPromises);
       alert('응답이 저장되었습니다!');
-      // 홈이 아니라 공유링크 첫 화면(이름 선택)으로 복귀 + 방금 응답한 사람 '응답 완료'로 표시
-      setRespondedNames((prev) => new Set(prev).add(selectedParticipant));
+
+      // 최신 응답 다시 불러오기 (응답 완료 표시 + 재진입 시 정확한 본인 응답)
+      const { success: rOk, data: rData } = await getMeetingResponses(meeting.id);
+      if (rOk) {
+        setAllResponses(rData);
+        setRespondedNames(new Set(rData.map((r) => r.participant_name)));
+      }
+
+      // 홈이 아니라 공유링크 첫 화면(이름 선택)으로 복귀, 그리드 초기화
       setSelectedParticipant('');
+      setCellStatus({});
       setPhase('select');
     } catch (err) {
       alert('저장 중 오류가 발생했습니다.');
@@ -229,7 +280,7 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
           <div className="form-actions" style={{ flexDirection: 'column' }}>
             <button
               className="btn btn-primary"
-              onClick={() => setPhase('time')}
+              onClick={goToTime}
               disabled={!selectedParticipant}
             >
               다음 →
@@ -296,6 +347,7 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
 
           <div
             className="pf-grid-scroll"
+            ref={gridScrollRef}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           >
@@ -322,7 +374,7 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
           </div>
         </div>
 
-        <p className="pf-scroll-hint">위아래로 스크롤하면 모든 시간을 볼 수 있어요</p>
+        {showScrollHint && <p className="pf-scroll-hint">아래로 스크롤하세요 ↓</p>}
 
         {/* 한마디 입력 */}
         <div className="form-group">

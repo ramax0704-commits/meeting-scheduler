@@ -186,13 +186,57 @@
   border-color: #d45656;
 }
 
-/* 필참 전원 가능 강조(파란 테두리) */
-.org-cell.req-ok {
+/* 토글 ON: 완전 전원 가능(실선) / 필참만 가능(점선) / 필참 불가(흐림) */
+.org-cell.req-perfect {
   border: 2px solid #4772fa;
 }
 
+.org-cell.req-partial {
+  border: 2px dashed #4772fa;
+}
+
 .org-cell.dimmed {
-  opacity: 0.28;
+  opacity: 0.25;
+}
+
+/* 토글 ON일 때 테두리 의미 설명 */
+.org-filter-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: -6px 0 16px;
+  padding: 10px 12px;
+  background-color: #f7faff;
+  border-radius: 10px;
+}
+
+.org-filter-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #555;
+}
+
+.org-filter-legend .fb {
+  width: 18px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background-color: #eef3ff;
+}
+
+.org-filter-legend .fb.solid {
+  border: 2px solid #4772fa;
+}
+
+.org-filter-legend .fb.dashed {
+  border: 2px dashed #4772fa;
+}
+
+.org-filter-legend .fb.faded {
+  opacity: 0.25;
+  background-color: #ccc;
 }
 
 .org-cell.selected {

@@ -148,15 +148,24 @@ export default function OrganizerView({ shareLink, onBack }) {
 
         {/* 필참 전원 가능 강조 토글 */}
         {requiredCount > 0 && (
-          <button
-            className={`org-filter ${onlyRequired ? 'on' : ''}`}
-            onClick={() => setOnlyRequired((v) => !v)}
-          >
-            <span className={`org-switch ${onlyRequired ? 'on' : ''}`}>
-              <span className="org-knob" />
-            </span>
-            필참자 전원 가능한 시간만 강조
-          </button>
+          <>
+            <button
+              className={`org-filter ${onlyRequired ? 'on' : ''}`}
+              onClick={() => setOnlyRequired((v) => !v)}
+            >
+              <span className={`org-switch ${onlyRequired ? 'on' : ''}`}>
+                <span className="org-knob" />
+              </span>
+              필참자 전원 가능한 시간만 강조
+            </button>
+            {onlyRequired && (
+              <div className="org-filter-legend">
+                <span><i className="fb solid" />완전 전원 가능</span>
+                <span><i className="fb dashed" />필참만 가능 (선택 인원 불가/회피)</span>
+                <span><i className="fb faded" />필참 불가</span>
+              </div>
+            )}
+          </>
         )}
 
         {/* 히트맵 그리드 */}
@@ -180,12 +189,16 @@ export default function OrganizerView({ shareLink, onBack }) {
                   const info = getCellInfo(col.date, time);
                   const isSel =
                     selectedCell && selectedCell.date === col.date && selectedCell.time === time;
-                  const reqBorder = onlyRequired && info && info.requiredAllOk;
-                  const dimmed = onlyRequired && info && !info.requiredAllOk;
+                  // 토글 ON: 완전 전원가능 / 필참만 가능(옵션 이슈) / 필참 불가 3단계 구분
+                  const everyoneFree =
+                    info && info.unavailable.length === 0 && info.maybe.length === 0;
+                  const reqPerfect = onlyRequired && info && info.requiredAllOk && everyoneFree;
+                  const reqPartial = onlyRequired && info && info.requiredAllOk && !everyoneFree;
+                  const blocked = onlyRequired && info && !info.requiredAllOk;
                   return (
                     <div
                       key={idx}
-                      className={`org-cell ${heatClass(info)} ${reqBorder ? 'req-ok' : ''} ${dimmed ? 'dimmed' : ''} ${isSel ? 'selected' : ''}`}
+                      className={`org-cell ${heatClass(info)} ${reqPerfect ? 'req-perfect' : ''} ${reqPartial ? 'req-partial' : ''} ${blocked ? 'dimmed' : ''} ${isSel ? 'selected' : ''}`}
                       onClick={() => setSelectedCell(isSel ? null : { date: col.date, time })}
                     />
                   );
@@ -200,7 +213,6 @@ export default function OrganizerView({ shareLink, onBack }) {
           <span className="lg"><i className="sw heat-free" />전원 가능</span>
           <span className="lg"><i className="sw heat-maybe" />회피 포함</span>
           <span className="lg"><i className="sw heat-red-2" />불가 포함</span>
-          <span className="lg"><i className="sw req-ok" />필참 전원 가능</span>
         </div>
 
         {/* 선택한 슬롯 상세 */}
