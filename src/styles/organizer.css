@@ -2,27 +2,23 @@
   width: 100%;
 }
 
-/* 헤더 */
+/* 헤더 (제목/응답수 세로 배치 + 가운데 정렬) */
 .org-header {
-  margin-bottom: 16px;
-}
-
-.org-title-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 16px;
 }
 
 .org-title {
   font-size: 20px;
   font-weight: 500;
   color: #000;
+  text-align: center;
 }
 
 .org-count {
-  flex-shrink: 0;
   font-size: 12px;
   font-weight: 500;
   color: #4772fa;
@@ -34,6 +30,37 @@
 .org-subtitle {
   font-size: 14px;
   color: #999;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* 탭 */
+.org-tabs {
+  display: flex;
+  gap: 8px;
+  background-color: #f3f3f3;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.org-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 9px;
+  background-color: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.org-tab.active {
+  background-color: white;
+  color: #4772fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* 필참 강조 토글 */
@@ -186,57 +213,31 @@
   border-color: #d45656;
 }
 
-/* 토글 ON: 완전 전원 가능(실선) / 필참만 가능(점선) / 필참 불가(흐림) */
-.org-cell.req-perfect {
+/* 필참 전원 가능 강조(파란 테두리) + 나머지 흐림 */
+.org-cell.req-ok {
   border: 2px solid #4772fa;
-}
-
-.org-cell.req-partial {
-  border: 2px dashed #4772fa;
 }
 
 .org-cell.dimmed {
-  opacity: 0.25;
+  opacity: 0.28;
 }
 
-/* 토글 ON일 때 테두리 의미 설명 */
-.org-filter-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: -6px 0 16px;
-  padding: 10px 12px;
-  background-color: #f7faff;
-  border-radius: 10px;
-}
-
-.org-filter-legend span {
+/* 추천 탭: 추천 슬롯 별표, 나머지 흐림 */
+.org-cell.recommended {
+  border: 2px solid #f5a623;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #555;
+  justify-content: center;
 }
 
-.org-filter-legend .fb {
-  width: 18px;
-  height: 14px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  background-color: #eef3ff;
+.org-cell .rec-star {
+  color: #e8890c;
+  font-size: 14px;
+  line-height: 1;
 }
 
-.org-filter-legend .fb.solid {
-  border: 2px solid #4772fa;
-}
-
-.org-filter-legend .fb.dashed {
-  border: 2px dashed #4772fa;
-}
-
-.org-filter-legend .fb.faded {
-  opacity: 0.25;
-  background-color: #ccc;
+.org-cell.rec-dim {
+  opacity: 0.3;
 }
 
 .org-cell.selected {

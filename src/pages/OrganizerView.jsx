@@ -13,8 +13,9 @@ export default function OrganizerView({ shareLink, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [tab, setTab] = useState('status'); // 'status'(응답 현황) | 'rec'(추천 시간)
   const [onlyRequired, setOnlyRequired] = useState(false); // 필참 전원 가능만 강조
-  const [selectedCell, setSelectedCell] = useState(null); // 탭한 셀 상세 {date, time}
+  const [selectedCell, setSelectedCell] = useState(null); // 탭한 셀 {date, time}
 
   useEffect(() => {
     loadData();
@@ -54,13 +55,11 @@ export default function OrganizerView({ shareLink, onBack }) {
   const meetingDates = [...new Set(timeSlots.map((s) => s.slot_date))].sort();
   const hours = [...new Set(timeSlots.map((s) => s.start_time))].sort();
 
-  // 날짜+시간 → 슬롯
   const slotByKey = {};
   timeSlots.forEach((s) => {
     slotByKey[`${s.slot_date}-${s.start_time}`] = s;
   });
 
-  // 슬롯별 응답 모으기
   const respBySlot = {};
   responses.forEach((r) => {
     (respBySlot[r.time_slot_id] = respBySlot[r.time_slot_id] || []).push(r);
@@ -69,7 +68,6 @@ export default function OrganizerView({ shareLink, onBack }) {
   const respondedNames = new Set(responses.map((r) => r.participant_name));
   const respondedCount = participants.filter((p) => respondedNames.has(p.name)).length;
 
-  // 한 슬롯의 집계 정보
   const getCellInfo = (date, time) => {
     const slot = slotByKey[`${date}-${time}`];
     if (!slot) return null;
@@ -86,7 +84,6 @@ export default function OrganizerView({ shareLink, onBack }) {
     };
   };
 
-  // 그리드 열 (선택된 날짜 + 최소 5칸 채움)
   const columnCount = Math.min(MAX_COLUMNS, Math.max(MIN_COLUMNS, meetingDates.length));
   const lastDate = meetingDates[meetingDates.length - 1] || dayjs().format('YYYY-MM-DD');
   const columns = Array.from({ length: columnCount }, (_, i) => {
@@ -109,24 +106,82 @@ export default function OrganizerView({ shareLink, onBack }) {
   };
 
   const fmtDate = (date) => `${dayjs(date).format('M월 D일')} (${WEEKDAYS[dayjs(date).day()]})`;
-  const fmtRange = (info) =>
-    `${info.slot.start_time.slice(0, 5)}~${info.slot.end_time.slice(0, 5)}`;
+  const fmtRange = (info) => `${info.slot.start_time.slice(0, 5)}~${info.slot.end_time.slice(0, 5)}`;
 
-  // 추천 시간 (조건 만족순 상위 3개)
-  const recommendations = meetingDates
+  // 추천: 순위를 억지로 매기지 않고, '조건이 가장 좋은' 슬롯을 모두 표시
+  const scored = meetingDates
     .flatMap((date) => hours.map((time) => ({ date, time, info: getCellInfo(date, time) })))
     .filter((c) => c.info)
     .map((c) => ({
       ...c,
       score:
-        (c.info.requiredAllOk ? 10000 : 0) -
+        (c.info.requiredAllOk ? 1000 : 0) -
         c.info.unavailable.length * 100 -
         c.info.maybe.length * 10,
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
+    }));
+  const maxScore = scored.length ? Math.max(...scored.map((s) => s.score)) : 0;
+  const recommendedKeys = new Set(
+    responses.length > 0
+      ? scored.filter((s) => s.score === maxScore && s.info.requiredAllOk).map((s) => `${s.date}-${s.time}`)
+      : []
+  );
 
   const selectedInfo = selectedCell ? getCellInfo(selectedCell.date, selectedCell.time) : null;
+  const selectedRecommended =
+    selectedCell && recommendedKeys.has(`${selectedCell.date}-${selectedCell.time}`);
+
+  // 그리드 렌더 (mode: 'status' | 'rec')
+  const renderGrid = (mode) => (
+    <div className="org-grid">
+      <div className="org-grid-header" style={{ gridTemplateColumns }}>
+        <div className="org-corner" />
+        {columns.map((col, idx) => (
+          <div key={idx} className={`org-date-head ${col.active ? '' : 'inactive'}`}>
+            <span className="org-dow">{WEEKDAYS[dayjs(col.date).day()]}</span>
+            <span className="org-dnum">{dayjs(col.date).date()}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="org-grid-scroll">
+        {hours.map((time) => (
+          <div key={time} className="org-grid-row" style={{ gridTemplateColumns }}>
+            <div className="org-time-label">{time.slice(0, 5)}</div>
+            {columns.map((col, idx) => {
+              if (!col.active) return <div key={idx} className="org-cell placeholder" />;
+              const info = getCellInfo(col.date, time);
+              const key = `${col.date}-${time}`;
+              const isSel = selectedCell && selectedCell.date === col.date && selectedCell.time === time;
+
+              let extra = '';
+              let star = null;
+              if (mode === 'status') {
+                if (onlyRequired && info) extra = info.requiredAllOk ? 'req-ok' : 'dimmed';
+              } else {
+                // 추천 탭: 추천 슬롯은 별표, 나머지는 흐리게
+                if (recommendedKeys.has(key)) {
+                  extra = 'recommended';
+                  star = <span className="rec-star">★</span>;
+                } else {
+                  extra = 'rec-dim';
+                }
+              }
+
+              return (
+                <div
+                  key={idx}
+                  className={`org-cell ${heatClass(info)} ${extra} ${isSel ? 'selected' : ''}`}
+                  onClick={() => setSelectedCell(isSel ? null : { date: col.date, time })}
+                >
+                  {star}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="organizer-view">
@@ -135,90 +190,81 @@ export default function OrganizerView({ shareLink, onBack }) {
       </button>
 
       <div className="card">
-        {/* 헤더 */}
+        {/* 헤더 (제목/응답수 세로 배치 + 가운데 정렬) */}
         <div className="org-header">
-          <div className="org-title-row">
-            <h2 className="org-title">{meeting.title}</h2>
-            <span className="org-count">
-              {participants.length}명 중 {respondedCount}명 응답
-            </span>
-          </div>
-          <p className="org-subtitle">색이 진할수록 안 되는 사람이 많아요</p>
+          <h2 className="org-title">{meeting.title}</h2>
+          <span className="org-count">
+            {participants.length}명 중 {respondedCount}명 응답
+          </span>
         </div>
 
-        {/* 필참 전원 가능 강조 토글 */}
-        {requiredCount > 0 && (
+        {/* 탭 */}
+        <div className="org-tabs">
+          <button
+            className={`org-tab ${tab === 'status' ? 'active' : ''}`}
+            onClick={() => { setTab('status'); setSelectedCell(null); }}
+          >
+            응답 현황
+          </button>
+          <button
+            className={`org-tab ${tab === 'rec' ? 'active' : ''}`}
+            onClick={() => { setTab('rec'); setSelectedCell(null); }}
+          >
+            추천 시간
+          </button>
+        </div>
+
+        {/* ── 응답 현황 탭 ── */}
+        {tab === 'status' && (
           <>
-            <button
-              className={`org-filter ${onlyRequired ? 'on' : ''}`}
-              onClick={() => setOnlyRequired((v) => !v)}
-            >
-              <span className={`org-switch ${onlyRequired ? 'on' : ''}`}>
-                <span className="org-knob" />
-              </span>
-              필참자 전원 가능한 시간만 강조
-            </button>
-            {onlyRequired && (
-              <div className="org-filter-legend">
-                <span><i className="fb solid" />완전 전원 가능</span>
-                <span><i className="fb dashed" />필참만 가능 (선택 인원 불가/회피)</span>
-                <span><i className="fb faded" />필참 불가</span>
-              </div>
+            <p className="org-subtitle">색이 진할수록 안 되는 사람이 많아요</p>
+
+            {requiredCount > 0 && (
+              <button
+                className={`org-filter ${onlyRequired ? 'on' : ''}`}
+                onClick={() => setOnlyRequired((v) => !v)}
+              >
+                <span className={`org-switch ${onlyRequired ? 'on' : ''}`}>
+                  <span className="org-knob" />
+                </span>
+                필참자 전원 가능한 시간만 강조
+              </button>
             )}
+
+            {renderGrid('status')}
+
+            <div className="org-legend">
+              <span className="lg"><i className="sw heat-free" />전원 가능</span>
+              <span className="lg"><i className="sw heat-maybe" />회피 포함</span>
+              <span className="lg"><i className="sw heat-red-2" />불가 포함</span>
+              {onlyRequired && requiredCount > 0 && (
+                <span className="lg"><i className="sw req-ok" />필참 전원 가능</span>
+              )}
+            </div>
           </>
         )}
 
-        {/* 히트맵 그리드 */}
-        <div className="org-grid">
-          <div className="org-grid-header" style={{ gridTemplateColumns }}>
-            <div className="org-corner" />
-            {columns.map((col, idx) => (
-              <div key={idx} className={`org-date-head ${col.active ? '' : 'inactive'}`}>
-                <span className="org-dow">{WEEKDAYS[dayjs(col.date).day()]}</span>
-                <span className="org-dnum">{dayjs(col.date).date()}</span>
-              </div>
-            ))}
-          </div>
+        {/* ── 추천 시간 탭 ── */}
+        {tab === 'rec' && (
+          <>
+            {responses.length === 0 ? (
+              <p className="org-subtitle">아직 응답이 없어요. 참석자들이 응답하면 추천 시간이 표시됩니다.</p>
+            ) : recommendedKeys.size === 0 ? (
+              <p className="org-subtitle">필참자가 모두 가능한 시간이 없어요.</p>
+            ) : (
+              <p className="org-subtitle">
+                ★ 표시가 조건이 가장 좋은 시간이에요 ({recommendedKeys.size}곳). 블록을 눌러 이유를 확인하세요.
+              </p>
+            )}
+            {renderGrid('rec')}
+          </>
+        )}
 
-          <div className="org-grid-scroll">
-            {hours.map((time) => (
-              <div key={time} className="org-grid-row" style={{ gridTemplateColumns }}>
-                <div className="org-time-label">{time.slice(0, 5)}</div>
-                {columns.map((col, idx) => {
-                  if (!col.active) return <div key={idx} className="org-cell placeholder" />;
-                  const info = getCellInfo(col.date, time);
-                  const isSel =
-                    selectedCell && selectedCell.date === col.date && selectedCell.time === time;
-                  // 토글 ON: 완전 전원가능 / 필참만 가능(옵션 이슈) / 필참 불가 3단계 구분
-                  const everyoneFree =
-                    info && info.unavailable.length === 0 && info.maybe.length === 0;
-                  const reqPerfect = onlyRequired && info && info.requiredAllOk && everyoneFree;
-                  const reqPartial = onlyRequired && info && info.requiredAllOk && !everyoneFree;
-                  const blocked = onlyRequired && info && !info.requiredAllOk;
-                  return (
-                    <div
-                      key={idx}
-                      className={`org-cell ${heatClass(info)} ${reqPerfect ? 'req-perfect' : ''} ${reqPartial ? 'req-partial' : ''} ${blocked ? 'dimmed' : ''} ${isSel ? 'selected' : ''}`}
-                      onClick={() => setSelectedCell(isSel ? null : { date: col.date, time })}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 범례 */}
-        <div className="org-legend">
-          <span className="lg"><i className="sw heat-free" />전원 가능</span>
-          <span className="lg"><i className="sw heat-maybe" />회피 포함</span>
-          <span className="lg"><i className="sw heat-red-2" />불가 포함</span>
-        </div>
-
-        {/* 선택한 슬롯 상세 */}
+        {/* 선택한 슬롯 상세 (익명, 명수만) */}
         {selectedInfo && (
           <div className="org-detail">
             <div className="org-detail-title">
+              {selectedRecommended ? '★ ' : ''}
               {fmtDate(selectedCell.date)} · {fmtRange(selectedInfo)}
             </div>
             {selectedInfo.unavailable.length === 0 && selectedInfo.maybe.length === 0 ? (
@@ -240,47 +286,6 @@ export default function OrganizerView({ shareLink, onBack }) {
                 )}
               </>
             )}
-          </div>
-        )}
-      </div>
-
-      {/* 추천 시간 */}
-      <div className="card org-rec-card">
-        <h3>추천 시간</h3>
-        <p className="org-rec-sub">조건을 가장 잘 만족하는 순서예요</p>
-
-        {responses.length === 0 ? (
-          <p className="text-sm">아직 응답이 없어요. 참석자들이 응답하면 추천이 표시됩니다.</p>
-        ) : (
-          <div className="rec-list">
-            {recommendations.map((r, i) => {
-              const { info } = r;
-              return (
-                <div key={`${r.date}-${r.time}`} className={`rec-card ${i === 0 ? 'top' : ''}`}>
-                  <div className="rec-head">
-                    <span className="rec-time">
-                      {fmtDate(r.date)} · {fmtRange(info)}
-                    </span>
-                    <span className="rec-rank">{i + 1}순위</span>
-                  </div>
-                  <ul className="rec-reasons">
-                    {requiredCount > 0 && (
-                      <li className={info.requiredAllOk ? 'ok' : 'warn'}>
-                        {info.requiredAllOk
-                          ? `필참 ${requiredCount}명 전원 가능`
-                          : `필참 ${info.requiredUnavailable.length}명 불가`}
-                      </li>
-                    )}
-                    <li className={info.unavailable.length === 0 ? 'ok' : 'warn'}>
-                      안 되는 사람 {info.unavailable.length}명
-                    </li>
-                    <li className={info.maybe.length === 0 ? 'ok' : 'warn'}>
-                      피하고 싶은 사람 {info.maybe.length}명
-                    </li>
-                  </ul>
-                </div>
-              );
-            })}
           </div>
         )}
       </div>
