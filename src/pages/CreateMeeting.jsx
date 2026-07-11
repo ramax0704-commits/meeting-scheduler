@@ -282,9 +282,11 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
   return (
     <div className="create-meeting">
-      <button className="back-button" onClick={() => (step === 1 ? onBack() : setStep(step - 1))}>
-        ← 뒤로
-      </button>
+      {step !== 4 && (
+        <button className="back-button" onClick={() => (step === 1 ? onBack() : setStep(step - 1))}>
+          ← 뒤로
+        </button>
+      )}
 
       {step !== 4 && (
         <div className="form-header">
@@ -311,6 +313,7 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
               value={formData.title}
               onChange={handleInputChange}
               placeholder="예: 4분기 킥오프 미팅"
+              maxLength={40}
             />
           </div>
 
@@ -322,7 +325,9 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
               onChange={handleInputChange}
               placeholder="회의 내용에 대해 설명해주세요"
               rows="3"
+              maxLength={50}
             />
+            <div className="char-count">{formData.description.length}/50</div>
           </div>
 
           <div className="form-group">
@@ -357,7 +362,7 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
           <div className="form-actions">
             <button className="btn btn-primary" onClick={handleNext}>
-              다음 →
+              다음
             </button>
           </div>
         </div>
@@ -424,7 +429,7 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
           <div className="form-actions">
             <button className="btn btn-primary" onClick={handleNext}>
-              다음 →
+              다음
             </button>
           </div>
         </div>
@@ -487,69 +492,69 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
       {/* Step 4: 완료 */}
       {step === 4 && createdMeeting && (
-        <div className="card success-card">
-          <h3>✅ 회의가 생성되었습니다!</h3>
+        <div className="card">
+          <h3 className="success-title">회의 생성이 완료되었습니다.</h3>
 
-          <div className="meeting-info">
-            <p>
-              <strong>회의명:</strong> {createdMeeting.title}
-            </p>
-            <p>
-              <strong>기간:</strong> {createdMeeting.start_date} ~ {createdMeeting.end_date}
-            </p>
+          <div className="meeting-summary">
+            <div className="mi-row">
+              <span className="mi-label">회의명</span>
+              <span className="mi-value">{createdMeeting.title}</span>
+            </div>
+            <div className="mi-row">
+              <span className="mi-label">회의 시간</span>
+              <span className="mi-value">{createdMeeting.duration_minutes}분</span>
+            </div>
+            {createdMeeting.description && (
+              <div className="mi-row">
+                <span className="mi-label">설명</span>
+                <span className="mi-value mi-desc">{createdMeeting.description}</span>
+              </div>
+            )}
           </div>
 
-          <div className="share-section">
-            <h4>공유 링크</h4>
-            <div className="share-link">
-              <code>{`${window.location.origin}/meeting/${createdMeeting.share_link}`}</code>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/meeting/${createdMeeting.share_link}`);
-                  alert('공유 링크가 복사되었습니다!');
-                }}
-              >
-                복사
-              </button>
-            </div>
+          <h4 className="share-title">회의 링크</h4>
+          <p className="share-desc">링크를 통해 응답과 응답 현황을 모두 볼 수 있습니다. 꼭 저장해주세요!</p>
+          <div className="meeting-link-box">
+            <code>{`${window.location.origin}/meeting/${createdMeeting.share_link}`}</code>
+          </div>
 
-            <div className="share-buttons">
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  const fullUrl = `${window.location.origin}/meeting/${createdMeeting.share_link}`;
-                  if (navigator.share) {
-                    navigator.share({
+          <div className="success-actions">
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/meeting/${createdMeeting.share_link}`
+                );
+                alert('회의 링크가 복사되었습니다!');
+              }}
+            >
+              복사하기
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                const fullUrl = `${window.location.origin}/meeting/${createdMeeting.share_link}`;
+                if (navigator.share) {
+                  navigator
+                    .share({
                       title: '회의 일정 조율',
                       text: `${createdMeeting.title} 회의에 참석해주세요!`,
                       url: fullUrl,
-                    }).catch((err) => console.log('공유 취소'));
-                  } else {
-                    alert('이 브라우저에서는 공유 기능을 지원하지 않습니다.');
-                  }
-                }}
-              >
-                📤 공유하기
-              </button>
-            </div>
-          </div>
-
-          <p className="text-sm" style={{ marginBottom: '16px' }}>
-            이 링크 하나로 참석자는 응답하고, 응답 현황도 함께 볼 수 있어요.
-          </p>
-
-          <div className="form-actions" style={{ flexDirection: 'column' }}>
-            <button
-              className="btn btn-primary"
-              onClick={() => onViewResult && onViewResult(createdMeeting.share_link)}
+                    })
+                    .catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(fullUrl);
+                  alert('링크가 복사되었습니다!');
+                }
+              }}
             >
-              응답 현황 보기
-            </button>
-            <button className="btn btn-secondary" onClick={onSuccess}>
-              처음으로 돌아가기
+              공유하기
             </button>
           </div>
+
+          <button className="text-button" onClick={onSuccess}>
+            처음으로 돌아가기
+          </button>
         </div>
       )}
     </div>

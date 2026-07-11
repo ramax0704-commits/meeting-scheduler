@@ -124,7 +124,9 @@ export default function OrganizerView({ shareLink, onBack }) {
       if (h === 12) return -5; // 점심
       return -10; // 오전 감점
     }
-    return 0; // 상관없음: 시간대 가점 없음
+    // 상관없음: 큰 편향은 없지만 동점일 때 오후를 오전보다 살짝 우선
+    if (h >= 13 && h <= 16) return 5;
+    return 0;
   };
   const timeLabel = (startTime) => {
     const h = parseInt(startTime.slice(0, 2), 10);
@@ -169,8 +171,12 @@ export default function OrganizerView({ shareLink, onBack }) {
     recRankByKey[`${r.date}-${r.time}`] = r.rank;
   });
 
-  const selectedInfo = selectedCell ? getCellInfo(selectedCell.date, selectedCell.time) : null;
-  const selectedRank = selectedCell ? recRankByKey[`${selectedCell.date}-${selectedCell.time}`] : undefined;
+  // 추천 탭에서는 아무것도 안 눌렀을 때 기본으로 1순위를 보여준다
+  const rank1 = recommendations[0];
+  const activeCell =
+    selectedCell || (tab === 'rec' && rank1 ? { date: rank1.date, time: rank1.time } : null);
+  const selectedInfo = activeCell ? getCellInfo(activeCell.date, activeCell.time) : null;
+  const selectedRank = activeCell ? recRankByKey[`${activeCell.date}-${activeCell.time}`] : undefined;
 
   // 그리드 렌더 (mode: 'status' | 'rec')
   const renderGrid = (mode) => (
@@ -193,7 +199,7 @@ export default function OrganizerView({ shareLink, onBack }) {
               if (!col.active) return <div key={idx} className="org-cell placeholder" />;
               const info = getCellInfo(col.date, time);
               const key = `${col.date}-${time}`;
-              const isSel = selectedCell && selectedCell.date === col.date && selectedCell.time === time;
+              const isSel = activeCell && activeCell.date === col.date && activeCell.time === time;
 
               let extra = '';
               let badge = null;
@@ -333,7 +339,7 @@ export default function OrganizerView({ shareLink, onBack }) {
           <div className="org-detail">
             <div className="org-detail-title">
               {selectedRank && <span className="org-rank-chip">{selectedRank}순위</span>}
-              {fmtDate(selectedCell.date)} · {fmtRange(selectedInfo)}
+              {fmtDate(activeCell.date)} · {fmtRange(selectedInfo)}
             </div>
 
             {selectedRank ? (
@@ -353,7 +359,7 @@ export default function OrganizerView({ shareLink, onBack }) {
                     )}
                   </>
                 )}
-                <p className="org-detail-line muted">🕐 {timeLabel(selectedCell.time)}</p>
+                <p className="org-detail-line muted">🕐 {timeLabel(activeCell.time)}</p>
               </>
             ) : selectedInfo.unavailable.length === 0 && selectedInfo.maybe.length === 0 ? (
               <p className="org-detail-line ok">모두 가능한 시간이에요 👍</p>

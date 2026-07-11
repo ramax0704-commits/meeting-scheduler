@@ -309,8 +309,7 @@
 }
 
 .org-cell.selected {
-  outline: 2px solid #333;
-  outline-offset: 1px;
+  background-color: #b9d0fb !important;
 }
 
 /* 범례 */

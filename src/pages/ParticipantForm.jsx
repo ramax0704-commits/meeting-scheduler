@@ -238,17 +238,20 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
         <div className="card">
           <h3>회의 정보</h3>
           <div className="meeting-summary">
-            <p>
-              <strong>회의명:</strong> {meeting.title}
-            </p>
+            <div className="mi-row">
+              <span className="mi-label">회의명</span>
+              <span className="mi-value">{meeting.title}</span>
+            </div>
+            <div className="mi-row">
+              <span className="mi-label">회의 시간</span>
+              <span className="mi-value">{meeting.duration_minutes}분</span>
+            </div>
             {meeting.description && (
-              <p>
-                <strong>설명:</strong> {meeting.description}
-              </p>
+              <div className="mi-row">
+                <span className="mi-label">설명</span>
+                <span className="mi-value mi-desc">{meeting.description}</span>
+              </div>
             )}
-            <p>
-              <strong>회의 길이:</strong> {meeting.duration_minutes}분
-            </p>
           </div>
 
           <h4 className="pf-section-label">본인 이름을 선택해주세요</h4>
@@ -283,11 +286,11 @@ export default function ParticipantForm({ shareLink, onBack, onViewResult }) {
               onClick={goToTime}
               disabled={!selectedParticipant}
             >
-              다음 →
+              다음
             </button>
             {onViewResult && (
               <button className="btn btn-secondary" onClick={onViewResult}>
-                📊 응답 현황 보기
+                응답 현황 보기
               </button>
             )}
           </div>

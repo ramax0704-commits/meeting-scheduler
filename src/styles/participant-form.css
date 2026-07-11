@@ -2,27 +2,47 @@
   width: 100%;
 }
 
-/* 회의 정보 섹션 */
+/* 회의 정보 섹션 (라벨/값 정렬) */
 .meeting-summary {
   background-color: #f9f9f9;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
   border: 1px solid #efefef;
+  text-align: left;
 }
 
-.meeting-summary p {
-  margin-bottom: 8px;
+.mi-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
   font-size: 14px;
 }
 
-.meeting-summary p:last-child {
+.mi-row:last-child {
   margin-bottom: 0;
 }
 
-.meeting-summary strong {
-  color: #000;
-  font-weight: 500;
+.mi-label {
+  flex-shrink: 0;
+  width: 60px;
+  color: #999;
+}
+
+.mi-value {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+}
+
+/* 설명: 회의 생성 때 줄바꿈 그대로 유지, 너무 길면 아래를 흐리게 자름 */
+.mi-desc {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 7.5em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
 }
 
 .pf-section-label {
