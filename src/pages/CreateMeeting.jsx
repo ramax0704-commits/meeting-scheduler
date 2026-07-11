@@ -492,7 +492,7 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
       {/* Step 4: 완료 */}
       {step === 4 && createdMeeting && (
-        <div className="card">
+        <div className="card success-complete">
           <h3 className="success-title">회의 생성이 완료되었습니다.</h3>
 
           <div className="meeting-summary">
@@ -514,7 +514,16 @@ export default function CreateMeeting({ onSuccess, onBack, onViewResult }) {
 
           <h4 className="share-title">회의 링크</h4>
           <p className="share-desc">링크를 통해 응답과 응답 현황을 모두 볼 수 있습니다. 꼭 저장해주세요!</p>
-          <div className="meeting-link-box">
+          <div
+            className="meeting-link-box"
+            title="눌러서 복사"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `${window.location.origin}/meeting/${createdMeeting.share_link}`
+              );
+              alert('회의 링크가 복사되었습니다!');
+            }}
+          >
             <code>{`${window.location.origin}/meeting/${createdMeeting.share_link}`}</code>
           </div>
 

@@ -10,12 +10,14 @@
   margin-bottom: 16px;
   border: 1px solid #efefef;
   text-align: left;
+  max-height: 180px;
+  overflow-y: auto;
 }
 
 .mi-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   font-size: 14px;
 }
 
@@ -35,14 +37,10 @@
   color: #333;
 }
 
-/* 설명: 회의 생성 때 줄바꿈 그대로 유지, 너무 길면 아래를 흐리게 자름 */
+/* 설명: 회의 생성 때 줄바꿈 그대로 유지 (길면 회의정보 박스가 스크롤됨) */
 .mi-desc {
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 7.5em;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
 }
 
 .pf-section-label {

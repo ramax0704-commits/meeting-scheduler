@@ -166,6 +166,10 @@
 }
 
 /* ── 회의 생성 완료 화면 ── */
+.success-complete {
+  margin-top: 24px;
+}
+
 .success-title {
   text-align: center;
   font-size: 18px;
@@ -177,7 +181,7 @@
   text-align: center;
   font-size: 15px;
   font-weight: 500;
-  margin: 20px 0 8px;
+  margin: 32px 0 8px;
 }
 
 .share-desc {
@@ -188,11 +192,19 @@
   margin-bottom: 12px;
 }
 
+/* 링크 박스: 텍스트 하이라이트와 색을 통일(연한 크림) + 눌러서 복사 */
 .meeting-link-box {
-  background-color: #f5f5f5;
+  background-color: #fdf6e3;
+  border: 1px solid #f2e6c4;
   border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 20px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.meeting-link-box:active {
+  background-color: #f8edcf;
 }
 
 .meeting-link-box code {
@@ -202,7 +214,8 @@
   overflow: hidden;
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: #333;
+  color: #7a5c00;
+  background: transparent;
   word-break: break-all;
   line-height: 1.5;
 }
